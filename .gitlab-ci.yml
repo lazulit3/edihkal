@@ -11,8 +11,6 @@ test-code:
   stage: test
   script:
     - cargo test --workspace
-    - cargo install cargo-tarpaulin
-    # - cargo tarpaulin --ignore-tests
 
 lint-code:
   stage: test
