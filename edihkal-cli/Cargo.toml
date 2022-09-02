@@ -1,0 +1,8 @@
+[package]
+name = "edihkal-cli"
+version = "0.1.0"
+edition = "2021"
+description = "CLI client for EDIHKAL"
+
+[dependencies]
+clap = { version = "3.2.17", features = ["derive"] }
