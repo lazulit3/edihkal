@@ -1,11 +1,5 @@
-use axum::{http::StatusCode, routing::get, Router, Server};
-use std::net::SocketAddr;
+use axum::{body::Body, http::StatusCode, routing::get, Router};
 
-pub async fn start() {
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
-    let app = Router::new().route("/health_check", get(|| async { StatusCode::OK }));
-    Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap()
+pub fn router() -> Router<Body> {
+    Router::new().route("/health_check", get(|| async { StatusCode::OK }))
 }
