@@ -1,3 +1,4 @@
+use axum::http::StatusCode;
 use axum_test_helper::TestClient;
 use edihkal_server::router;
 
@@ -5,7 +6,7 @@ use edihkal_server::router;
 async fn health_check_works() {
     let client = TestClient::new(router());
 
-    let res = client.get("/health_check").send().await;
+    let response = client.get("/health_check").send().await;
 
-    assert!(res.status().is_success());
+    assert_eq!(response.status(), StatusCode::OK);
 }
