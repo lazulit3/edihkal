@@ -1,10 +1,11 @@
 use axum::Server;
-use edihkal_server::router;
+use edihkal_server::{configuration::get_configuration, router::router};
 use std::net::SocketAddr;
 
 #[tokio::main]
 async fn main() {
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    let configuration = get_configuration().expect("Failed to read configuration");
+    let addr = SocketAddr::from(([127, 0, 0, 1], configuration.application_port));
 
     Server::bind(&addr)
         .serve(router().into_make_service())

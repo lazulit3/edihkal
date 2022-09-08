@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use axum_test_helper::TestClient;
-use edihkal_server::router;
+use edihkal_server::router::router;
 
 #[tokio::test]
 async fn health_check_works() {

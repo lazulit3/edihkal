@@ -1,19 +1,21 @@
 use axum::http::StatusCode;
 use axum_test_helper::TestClient;
-use edihkal_server::router;
+use edihkal_server::{configuration::get_configuration, router::router};
 use std::collections::HashMap;
 
 #[tokio::test]
 async fn define_drug_returns_200_for_valid_data() {
-    // TODO: Replace with model
-    let mut map = HashMap::new();
-    map.insert("name", "caffeine");
-
     let client = TestClient::new(router());
+    let configuration = get_configuration().expect("Failed to read configuration");
+    let connection_string = configuration.database.connection_string();
+    // TODO: Replace with model
+    let mut drug_data = HashMap::new();
+    drug_data.insert("name", "caffeine");
+
     let response = client
         .post("/drugs")
         .header("Content-Type", "application/json")
-        .json(&map)
+        .json(&drug_data)
         .send()
         .await;
 
