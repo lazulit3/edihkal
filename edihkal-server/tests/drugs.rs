@@ -35,7 +35,7 @@ async fn define_drug_returns_200_for_valid_data() {
 }
 
 #[tokio::test]
-async fn defin_drug_returns_400_for_missing_data() {
+async fn define_drug_returns_400_for_missing_data() {
     let client = TestClient::new(router());
     let response = client.post("/drugs").send().await;
 
