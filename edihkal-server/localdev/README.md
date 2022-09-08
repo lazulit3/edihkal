@@ -1,14 +1,17 @@
 # Local Development
 
-A compose file is available for running EDIHKAL's database in a container for local development.
+`init_db.sh` can be run to start a local database container for edihkal-server.
 
 ## Configuration
 
-### .env
-Before deploying this setup, you need to configure the following values in the .env file:
+Before running `init_db.sh` you may configure the environment variables used in `envs`.
 
 - DB_PASSWORD
 
-## Start the Container(s)
+Running `init_db.sh` will automagically create the database and run migrations to set up the schema.
 
-Start the containers using `docker compose up` or `podman-compose up` for podman users.
+To run the migrations when the database container is already started, you can set the `SKIP_STARTUP` environment variable:
+
+```
+SKIP_STARTUP=1 ./init_db.sh
+```
