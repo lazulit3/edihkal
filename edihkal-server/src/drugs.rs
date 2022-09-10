@@ -10,6 +10,6 @@ pub async fn get_drugs() -> StatusCode {
     StatusCode::OK
 }
 
-pub async fn define_drug(Json(payload): Json<Drug>) -> StatusCode {
+pub async fn define_drug(Json(_payload): Json<Drug>) -> StatusCode {
     StatusCode::OK
 }

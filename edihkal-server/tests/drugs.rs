@@ -7,10 +7,7 @@ use std::collections::HashMap;
 #[tokio::test]
 async fn define_drug_returns_200_for_valid_data() {
     let configuration = get_configuration().expect("Failed to read configuration");
-    let connection = PgConnection::connect(&configuration.database.connection_string())
-        .await
-        .expect("Failed to connect to database");
-    let client = TestClient::new(router(connection));
+    let client = TestClient::new(router(&configuration).await);
 
     // TODO: Replace with model
     let mut drug_data = HashMap::new();
@@ -25,13 +22,12 @@ async fn define_drug_returns_200_for_valid_data() {
 
     assert_eq!(response.status(), StatusCode::OK);
 
-    // TODO: This is silly
-    let mut test_connection = PgConnection::connect(&configuration.database.connection_string())
+    let mut connection = PgConnection::connect(&configuration.database.connection_string())
         .await
         .expect("Failed to connect to database");
 
     let saved_drug = sqlx::query!("SELECT name FROM drugs",)
-        .fetch_one(&mut test_connection)
+        .fetch_one(&mut connection)
         .await
         .expect("Failed to fetch defined drug.");
 
@@ -41,10 +37,8 @@ async fn define_drug_returns_200_for_valid_data() {
 #[tokio::test]
 async fn define_drug_returns_400_for_missing_data() {
     let configuration = get_configuration().expect("Failed to read configuration");
-    let connection = PgConnection::connect(&configuration.database.connection_string())
-        .await
-        .expect("Failed to connect to database");
-    let client = TestClient::new(router(connection));
+    let client = TestClient::new(router(&configuration).await);
+
     let response = client.post("/drugs").send().await;
 
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
@@ -53,9 +47,6 @@ async fn define_drug_returns_400_for_missing_data() {
 #[tokio::test]
 async fn get_drugs_returns_list_of_drugs() {
     let configuration = get_configuration().expect("Failed to read configuration");
-    let connection = PgConnection::connect(&configuration.database.connection_string())
-        .await
-        .expect("Failed to connect to database");
-    let client = TestClient::new(router(connection));
+    let _client = TestClient::new(router(&configuration).await);
     todo!()
 }
