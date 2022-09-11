@@ -6,7 +6,13 @@
 
 Before running `init_db.sh` you may configure the environment variables used in `envs`.
 
-- DB_PASSWORD
+The `sqlx-cli` tool is used to create the databas and run migrations. You can install it by running:
+
+```sh
+cargo install sqlx-cli --no-default-features -F postgres,rustls
+```
+
+## Usage
 
 Running `init_db.sh` will automagically create the database and run migrations to set up the schema.
 
