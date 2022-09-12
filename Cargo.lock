@@ -499,6 +499,7 @@ dependencies = [
  "config",
  "reqwest",
  "serde",
+ "serde_json",
  "sqlx",
  "sqlx-cli",
  "tokio",
