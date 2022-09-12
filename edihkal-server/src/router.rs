@@ -1,21 +1,28 @@
 use std::sync::Arc;
 
 use axum::{body::Body, http::StatusCode, routing::get, Extension, Router};
-use sqlx::{Connection, PgConnection};
+use sqlx::PgPool;
 
 use crate::{
-    configuration::Settings,
+    configuration::{DatabaseSettings, Settings},
     drugs::{define_drug, get_drugs},
 };
 
-pub async fn router(configuration: &Settings) -> Router<Body> {
-    let connection = PgConnection::connect(&configuration.database.connection_string())
-        .await
-        .expect("Failed to connect to database");
-    let connection = Arc::new(connection);
+pub async fn app(configuration: &Settings) -> Router<Body> {
+    let db_pool = db_pool(&configuration.database).await;
+    router(db_pool).await
+}
 
+async fn db_pool(db_settings: &DatabaseSettings) -> PgPool {
+    PgPool::connect(&db_settings.connection_string())
+        .await
+        .expect("Failed to connect to database")
+}
+
+async fn router(db_pool: PgPool) -> Router<Body> {
+    let db_pool = Arc::new(db_pool);
     Router::new()
         .route("/health_check", get(|| async { StatusCode::OK }))
         .route("/drugs", get(get_drugs).post(define_drug))
-        .layer(Extension(connection))
+        .layer(Extension(db_pool))
 }
