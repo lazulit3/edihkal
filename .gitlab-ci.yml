@@ -14,9 +14,19 @@ lint-code:
     - cargo fmt -- --check
     - rustup component add clippy
     - cargo clippy -- -D warnings
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
 
 audit-code:
   stage: test
   script:
     - cargo install cargo-audit
     - cargo audit
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - "**/Cargo.lock"
+          - "**/Cargo.toml"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
