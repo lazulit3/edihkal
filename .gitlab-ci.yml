@@ -24,7 +24,8 @@ test-code:
   script:
     - cargo test --workspace
   services:
-    - timescale/timescaledb:latest-pg14
+    - name: timescale/timescaledb:latest-pg14
+      alias: database
 
 lint-code:
   stage: test
@@ -34,7 +35,8 @@ lint-code:
     - rustup component add clippy
     - cargo clippy -- -D warnings
   services:
-    - timescale/timescaledb:latest-pg14
+    - name: timescale/timescaledb:latest-pg14
+      alias: database
 
 audit-code:
   stage: test
