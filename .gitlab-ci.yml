@@ -4,6 +4,15 @@ default:
     - rustc --version 
     - cargo --version
 
+services:
+  - timescale/timescaledb:latest-pg14
+
+variables:
+  POSTGRES_DB: $POSTGRES_DB
+  POSTGRES_USER: $POSTGRES_USER
+  POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+  POSTGRES_HOST_AUTH_METHOD: trust
+
 stages:
   - test
 
@@ -14,8 +23,6 @@ lint-code:
     - cargo fmt -- --check
     - rustup component add clippy
     - cargo clippy -- -D warnings
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 audit-code:
   stage: test
