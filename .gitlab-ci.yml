@@ -1,10 +1,16 @@
 default:
-  image: "rust:latest"
   before_script:
     - rustc --version 
     - cargo --version
+  cache:
+    paths:
+      - $CARGO_HOME
+      - target/
+  image: "rust:latest"
 
 variables:
+  # Ensure cargo home is relative to project dir (for caching)
+  CARGO_HOME: $CI_PROJECT_DIR/.cargo
   POSTGRES_DB: $POSTGRES_DB
   POSTGRES_USER: $POSTGRES_USER
   POSTGRES_PASSWORD: $POSTGRES_PASSWORD
