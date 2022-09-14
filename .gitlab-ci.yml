@@ -4,9 +4,6 @@ default:
     - rustc --version 
     - cargo --version
 
-services:
-  - timescale/timescaledb:latest-pg14
-
 variables:
   POSTGRES_DB: $POSTGRES_DB
   POSTGRES_USER: $POSTGRES_USER
@@ -16,6 +13,13 @@ variables:
 stages:
   - test
 
+test-code:
+  stage: test
+  script:
+    - cargo test --workspace
+  services:
+    - timescale/timescaledb:latest-pg14
+
 lint-code:
   stage: test
   script:
@@ -23,6 +27,8 @@ lint-code:
     - cargo fmt -- --check
     - rustup component add clippy
     - cargo clippy -- -D warnings
+  services:
+    - timescale/timescaledb:latest-pg14
 
 audit-code:
   stage: test
