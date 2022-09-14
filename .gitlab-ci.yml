@@ -16,6 +16,11 @@ variables:
 stages:
   - test
 
+test-code:
+  stage: test
+  script:
+    - cargo test --workspace
+
 lint-code:
   stage: test
   script:
