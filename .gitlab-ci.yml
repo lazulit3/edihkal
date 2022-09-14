@@ -23,8 +23,6 @@ lint-code:
     - cargo fmt -- --check
     - rustup component add clippy
     - cargo clippy -- -D warnings
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 audit-code:
   stage: test
