@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+localdev_dir="$(dirname -- $( readlink -f -- "$0"; ))"
+
 if ! [ -x "$(command -v psql)" ]; then
   echo >&2 "Error: psql is not installed."
   exit 1
@@ -14,8 +16,12 @@ if ! [ -x "$(command -v sqlx)" ]; then
   exit 1
 fi
 
-localdev_dir="$(dirname -- $( readlink -f -- "$0"; ))"
-source "${localdev_dir}/envs"
+
+DB_USER=${POSTGRES_USER:=edihkal}
+DB_PASSWORD="${POSTGRES_PASSWORD:=changeme}"
+DB_NAME="${POSTGRES_DB:=edihkal}"
+DB_HOST="127.0.0.1"
+DB_PORT="${POSTGRES_PORT:=5432}"
 
 # Set to skip container start if edihcal-timescaledb is already running
 if [[ -z "${SKIP_STARTUP}" ]]
@@ -31,10 +37,11 @@ fi
 
 # Wait until DB is ready
 export PGPASSWORD="${DB_PASSWORD}"
-until psql -h "127.0.0.1" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'; do
+until psql -h "${DB_HOST}" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'; do
   >&2 echo "Postgres is still unavailable. Sleeping..."
   sleep 1
 done
 
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
 sqlx database create
 sqlx migrate run --source "${localdev_dir}/../migrations"
