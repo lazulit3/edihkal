@@ -1,0 +1,16 @@
+{
+  "db": "PostgreSQL",
+  "e0089f8d0f8896245fe258a0ead6676dd736474b4df2b73866c58a4d1e0b9583": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO drugs (id, name)\n        VALUES ($1, $2)\n        "
+  }
+}
