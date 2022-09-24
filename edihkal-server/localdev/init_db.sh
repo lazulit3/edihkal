@@ -20,7 +20,7 @@ fi
 DB_USER=${POSTGRES_USER:=edihkal}
 DB_PASSWORD="${POSTGRES_PASSWORD:=changeme}"
 DB_NAME="${POSTGRES_DB:=edihkal}"
-DB_HOST="127.0.0.1"
+DB_HOST="${POSTGRES_HOST:=127.0.0.1}"
 DB_PORT="${POSTGRES_PORT:=5432}"
 
 # Set to skip container start if edihcal-timescaledb is already running

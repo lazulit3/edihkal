@@ -1,39 +1,49 @@
 default:
   before_script:
-    - rustc --version 
+    - rustc --version
     - cargo --version
+    - export PATH="${CARGO_HOME}/bin:${PATH}"
   cache:
-    paths:
-      - $CARGO_HOME
-      - target/
+    # Cache build/cargo dependencies based on Cargo.lock changes
+    - key:
+        files:
+          - "**/Cargo.lock"
+        prefix: cargo
+      paths:
+        - ${CARGO_HOME}/git/db
+        - ${CARGO_HOME}/registry/cache
+        - ${CARGO_HOME}/registry/index
+        - target
   image: "rust:latest"
 
 variables:
   # Ensure cargo home is relative to project dir (for caching)
-  CARGO_HOME: $CI_PROJECT_DIR/.cargo
-  POSTGRES_DB: $POSTGRES_DB
-  POSTGRES_USER: $POSTGRES_USER
+  CARGO_HOME: ${CI_PROJECT_DIR}/.cargo
+  EDIHKAL_DATABASE__HOST: database
+  EDIHKAL_DATABASE__PASSWORD: $POSTGRES_PASSWORD
+  # POSTGRES envs build DATABASE_URL in edihkal-server/.env for compile-time sqlx-macros
+  POSTGRES_DB: edihkal
+  POSTGRES_USER: edihkal
   POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+  POSTGRES_HOST: database
   POSTGRES_HOST_AUTH_METHOD: trust
+  # Pin sqlx-cli details
+  SQLX_VERSION: 0.6.2
+  SQLX_FEATURES: postgres,rustls
 
 stages:
+  - prepare
   - test
 
-test-code:
-  stage: test
+# Create/migrate DB in prepare stage because future jobs share this service
+prepare-db:
+  stage: prepare
   script:
-    - cargo test --workspace
-  services:
-    - name: timescale/timescaledb:latest-pg14
-      alias: database
-
-lint-code:
-  stage: test
-  script:
-    - rustup component add rustfmt
-    - cargo fmt -- --check
-    - rustup component add clippy
-    - cargo clippy -- -D warnings
+    - cargo install sqlx-cli --force --locked --version=${SQLX_VERSION} --features=${SQLX_FEATURES} --no-default-features
+    - apt update -y
+    - apt install -y postgresql-client
+    # SKIP_STARTUP to only create & migrate DB (no container management needed in CI)
+    - SKIP_STARTUP=1 edihkal-server/localdev/init_db.sh
   services:
     - name: timescale/timescaledb:latest-pg14
       alias: database
@@ -43,10 +53,67 @@ audit-code:
   script:
     - cargo install cargo-audit
     - cargo audit
+  needs: []
   rules:
+    # Only audit on nightly schedule or when merge requests change dependencies
+    - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         paths:
           - "**/Cargo.lock"
-          - "**/Cargo.toml"
-    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+format-code:
+  stage: test
+  needs: []
+  rules:
+    - changes:
+        paths:
+          - "**/*.rs"
+  script:
+    - rustup component add rustfmt
+    - cargo fmt --all -- --check
+
+lint-code:
+  cache:
+    # Cache sqlx-cli from pinned version/features
+    key: sqlx-${SQLX_VERSION}-${SQLX_FEATURES}
+    paths:
+      - ${CARGO_HOME}/bin/sqlx
+      - ${CARGO_HOME}/bin/cargo-sqlx
+  stage: test
+  script:
+    # Only install sqlx-cli if not already present from cache
+    - if ! [ -x "$(command -v sqlx)" ]; then cargo install sqlx-cli --force --locked --version=${SQLX_VERSION} --features=${SQLX_FEATURES} --no-default-features; fi
+    - apt update -y
+    # psql required by init_db.sh to wait for DB readiness before running migrations
+    - apt install -y postgresql-client
+    # SKIP_STARTUP to only create & migrate DB (no container management needed in CI)
+    - SKIP_STARTUP=1 edihkal-server/localdev/init_db.sh
+    - cargo sqlx prepare --check --merged
+    - rustup component add clippy
+    - cargo clippy -- -D warnings
+  services:
+    - name: timescale/timescaledb:latest-pg14
+      alias: database
+
+test-code:
+  cache:
+    # Cache sqlx-cli from pinned version/features
+    key: sqlx-${SQLX_VERSION}-${SQLX_FEATURES}
+    paths:
+      - ${CARGO_HOME}/bin/sqlx
+      - ${CARGO_HOME}/bin/cargo-sqlx
+  stage: test
+  needs: ["prepare-db"]
+  script:
+    # Only install sqlx-cli if not already present from cache
+    - if ! [ -x "$(command -v sqlx)" ]; then cargo install sqlx-cli --force --locked --version=${SQLX_VERSION} --features=${SQLX_FEATURES} --no-default-features; fi
+    - apt update -y
+    # psql required by init_db.sh to wait for DB readiness before running migrations
+    - apt install -y postgresql-client
+    # SKIP_STARTUP to only create & migrate DB (no container management needed in CI)
+    - SKIP_STARTUP=1 edihkal-server/localdev/init_db.sh
+    - cargo test --workspace
+  services:
+    - name: timescale/timescaledb:latest-pg14
+      alias: database
