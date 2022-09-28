@@ -1,6 +1,6 @@
 # Local Development
 
-`init_db.sh` can be run to start a local database container for edihkal-server.
+`init_db.sh` can be run to start a local database container for edihkal.
 
 ## Configuration
 

@@ -1,2 +1,2 @@
 [workspace]
-members = ["edid", "edihkal-server"]
+members = ["edid", "edihkal"]
