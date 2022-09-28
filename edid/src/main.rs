@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
 
+mod drugs;
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
@@ -11,15 +12,7 @@ struct Cli {
 enum Commands {
     Drugs {
         #[command(subcommand)]
-        drugs_command: Option<DrugsCommands>,
-    },
-}
-
-#[derive(Subcommand)]
-enum DrugsCommands {
-    Define {
-        /// Name of a drug to define
-        name: String,
+        drugs_command: drugs::Commands,
     },
 }
 
@@ -28,9 +21,7 @@ fn main() {
 
     match &cli.command {
         Some(Commands::Drugs { drugs_command }) => {
-            if let Some(DrugsCommands::Define { name }) = drugs_command {
-                println!("{name} has been defined.");
-            }
+            drugs::run(drugs_command);
         }
         None => {}
     }
