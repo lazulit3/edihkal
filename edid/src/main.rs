@@ -1,16 +1,24 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[clap(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None)]
 struct Cli {
-    #[clap(subcommand)]
-    command: Commands,
+    #[command(subcommand)]
+    command: Option<Commands>,
 }
 
 #[derive(Subcommand)]
 enum Commands {
+    Drugs {
+        #[command(subcommand)]
+        drugs_command: Option<DrugsCommands>,
+    },
+}
+
+#[derive(Subcommand)]
+enum DrugsCommands {
     Define {
-        #[clap(value_parser)]
+        /// Name of a drug to define
         name: String,
     },
 }
@@ -19,8 +27,17 @@ fn main() {
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Define { name } => {
-            println!("{name} has been defined.");
+        Some(Commands::Drugs { drugs_command }) => {
+            if let Some(DrugsCommands::Define { name }) = drugs_command {
+                println!("{name} has been defined.");
+            }
         }
+        None => {}
     }
+}
+
+#[test]
+fn verify_cli() {
+    use clap::CommandFactory;
+    Cli::command().debug_assert()
 }
