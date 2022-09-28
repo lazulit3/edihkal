@@ -1,8 +1,8 @@
 [package]
-name = "edihkal-cli"
+name = "edid"
 version = "0.1.0"
 edition = "2021"
-description = "CLI client for EDIHKAL"
+description = "EDID: Every Drug I Did, a CLI client for EDIHKAL."
 
 [dependencies]
 clap = { version = "3.2.17", features = ["derive"] }
