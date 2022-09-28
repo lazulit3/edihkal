@@ -21,7 +21,7 @@ variables:
   CARGO_HOME: ${CI_PROJECT_DIR}/.cargo
   EDIHKAL_DATABASE__HOST: database
   EDIHKAL_DATABASE__PASSWORD: $POSTGRES_PASSWORD
-  # POSTGRES envs build DATABASE_URL in edihkal-server/.env for compile-time sqlx-macros
+  # POSTGRES envs build DATABASE_URL in edihkal/.env for compile-time sqlx-macros
   POSTGRES_DB: edihkal
   POSTGRES_USER: edihkal
   POSTGRES_PASSWORD: $POSTGRES_PASSWORD
@@ -43,7 +43,7 @@ prepare-db:
     - apt update -y
     - apt install -y postgresql-client
     # SKIP_STARTUP to only create & migrate DB (no container management needed in CI)
-    - SKIP_STARTUP=1 edihkal-server/localdev/init_db.sh
+    - SKIP_STARTUP=1 edihkal/localdev/init_db.sh
   services:
     - name: timescale/timescaledb:latest-pg14
       alias: database
@@ -88,7 +88,7 @@ lint-code:
     # psql required by init_db.sh to wait for DB readiness before running migrations
     - apt install -y postgresql-client
     # SKIP_STARTUP to only create & migrate DB (no container management needed in CI)
-    - SKIP_STARTUP=1 edihkal-server/localdev/init_db.sh
+    - SKIP_STARTUP=1 edihkal/localdev/init_db.sh
     - cargo sqlx prepare --check --merged
     - rustup component add clippy
     - cargo clippy -- -D warnings
@@ -112,7 +112,7 @@ test-code:
     # psql required by init_db.sh to wait for DB readiness before running migrations
     - apt install -y postgresql-client
     # SKIP_STARTUP to only create & migrate DB (no container management needed in CI)
-    - SKIP_STARTUP=1 edihkal-server/localdev/init_db.sh
+    - SKIP_STARTUP=1 edihkal/localdev/init_db.sh
     - cargo test --workspace
   services:
     - name: timescale/timescaledb:latest-pg14

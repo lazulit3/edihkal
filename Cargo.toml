@@ -1,2 +1,2 @@
 [workspace]
-members = ["edihkal-cli", "edihkal-server"]
+members = ["edid", "edihkal"]

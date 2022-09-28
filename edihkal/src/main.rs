@@ -1,5 +1,5 @@
 use axum::Server;
-use edihkal_server::{configuration::get_configuration, router::app};
+use edihkal::{configuration::get_configuration, router::app};
 use std::net::SocketAddr;
 
 #[tokio::main]

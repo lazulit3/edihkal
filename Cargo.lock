@@ -330,14 +330,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "edihkal-cli"
+name = "edid"
 version = "0.1.0"
 dependencies = [
  "clap",
 ]
 
 [[package]]
-name = "edihkal-server"
+name = "edihkal"
 version = "0.1.0"
 dependencies = [
  "axum",
