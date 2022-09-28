@@ -5,4 +5,4 @@ edition = "2021"
 description = "EDID: Every Drug I Did, a CLI client for EDIHKAL."
 
 [dependencies]
-clap = { version = "3.2.17", features = ["derive"] }
+clap = { version = "4.0.0-rc.3", features = ["derive"] }
