@@ -1,5 +1,5 @@
 use axum_test_helper::TestClient;
-use edihkal_server::{
+use edihkal::{
     configuration::{get_configuration, DatabaseSettings},
     router::router,
 };
