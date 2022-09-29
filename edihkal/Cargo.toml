@@ -5,6 +5,7 @@ edition = "2021"
 description = "Server for EDIHKAL"
 
 [dependencies]
+aide = { version = "0.6.0", features = ["axum"] }
 axum = { version = "0.6.0-rc.2", default-features = false, features = ["http1", "http2", "json"] }
 config = { version = "0.13.2", default-features = false, features = ["yaml"] }
 serde = "1.0.144"
