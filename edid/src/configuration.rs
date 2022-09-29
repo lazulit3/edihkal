@@ -19,7 +19,7 @@ impl Config {
     }
 
     /// Returns config loaded from config file and environment variables.
-    pub fn with_config_file(config_path: &Path) -> Result<Config, config::ConfigError> {
+    pub fn load_with_config_file(config_path: &Path) -> Result<Config, config::ConfigError> {
         let config = config::Config::builder()
             .add_source(config::File::from(config_path))
             .add_source(
