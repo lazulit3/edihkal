@@ -3,8 +3,8 @@ set -eo pipefail
 
 localdev_dir="$(dirname -- $( readlink -f -- "$0"; ))"
 
-if ! [ -x "$(command -v psql)" ]; then
-  echo >&2 "Error: psql is not installed."
+if ! [ -x "$(command -v pg_isready)" ]; then
+  echo >&2 "Error: pg_isready is not installed."
   exit 1
 fi
 
@@ -37,7 +37,7 @@ fi
 
 # Wait until DB is ready
 export PGPASSWORD="${DB_PASSWORD}"
-until psql -h "${DB_HOST}" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'; do
+until pg_isready -h "${DB_HOST}" -p "${DB_PORT}" -d postgres -U "$DB_USER"; do
   >&2 echo "Postgres is still unavailable. Sleeping..."
   sleep 1
 done
