@@ -16,6 +16,14 @@ if ! [ -x "$(command -v sqlx)" ]; then
   exit 1
 fi
 
+# Default to using podman if CONTAINER_TOOL is not specified.
+CONTAINER_TOOL="${CONTAINER_TOOL:-podman}"
+
+if [[ -z "${SKIP_STARTUP}" ]] && ! [ -x "$(command -v "$CONTAINER_TOOL")" ]; then
+  echo >&2 "Error: Container tool ${CONTAINER_TOOL} is not installed."
+  echo >&2 "You may choose which tool should manage the DB container by setting CONTAINER_TOOL."
+  exit 1
+fi
 
 DB_USER=${POSTGRES_USER:=edihkal}
 DB_PASSWORD="${POSTGRES_PASSWORD:=changeme}"
@@ -26,7 +34,7 @@ DB_PORT="${POSTGRES_PORT:=5432}"
 # Set to skip container start if edihcal-timescaledb is already running
 if [[ -z "${SKIP_STARTUP}" ]]
 then
-  podman run --name edihkal-timescaledb \
+  "$CONTAINER_TOOL" run --name edihkal-timescaledb \
              -p "127.0.0.1:${DB_PORT}:5432" \
              -e POSTGRES_DB=${DB_NAME} \
              -e POSTGRES_PASSWORD=${DB_PASSWORD} \
