@@ -3,19 +3,27 @@ set -eo pipefail
 
 localdev_dir="$(dirname -- $( readlink -f -- "$0"; ))"
 
-if ! [ -x "$(command -v psql)" ]; then
-  echo >&2 "Error: psql is not installed."
+if ! [ -x "$(command -v pg_isready)" ]; then
+  echo >&2 "Error: pg_isready is not installed."
   exit 1
 fi
 
 if ! [ -x "$(command -v sqlx)" ]; then
   echo >&2 "Error: sqlx is not installed."
   echo >&2 "Use:"
-  echo >&2 "    cargo install sqlx-cli --no-default-features --features postgres"
+  echo >&2 "    cargo install sqlx-cli --no-default-features --features postgres,rustls"
   echo >&2 "to install it."
   exit 1
 fi
 
+# Default to using podman if CONTAINER_TOOL is not specified.
+CONTAINER_TOOL="${CONTAINER_TOOL:-podman}"
+
+if [[ -z "${SKIP_STARTUP}" ]] && ! [ -x "$(command -v "$CONTAINER_TOOL")" ]; then
+  echo >&2 "Error: Container tool ${CONTAINER_TOOL} is not installed."
+  echo >&2 "You may choose which tool should manage the DB container by setting CONTAINER_TOOL."
+  exit 1
+fi
 
 DB_USER=${POSTGRES_USER:=edihkal}
 DB_PASSWORD="${POSTGRES_PASSWORD:=changeme}"
@@ -26,7 +34,7 @@ DB_PORT="${POSTGRES_PORT:=5432}"
 # Set to skip container start if edihcal-timescaledb is already running
 if [[ -z "${SKIP_STARTUP}" ]]
 then
-  podman run --name edihkal-timescaledb \
+  "$CONTAINER_TOOL" run --name edihkal-timescaledb \
              -p "127.0.0.1:${DB_PORT}:5432" \
              -e POSTGRES_DB=${DB_NAME} \
              -e POSTGRES_PASSWORD=${DB_PASSWORD} \
@@ -37,7 +45,7 @@ fi
 
 # Wait until DB is ready
 export PGPASSWORD="${DB_PASSWORD}"
-until psql -h "${DB_HOST}" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'; do
+until pg_isready -h "${DB_HOST}" -p "${DB_PORT}" -d postgres -U "$DB_USER"; do
   >&2 echo "Postgres is still unavailable. Sleeping..."
   sleep 1
 done
