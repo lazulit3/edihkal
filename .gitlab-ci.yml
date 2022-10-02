@@ -10,6 +10,7 @@ default:
     - rustc --version
     - cargo --version
     - export PATH="${CARGO_HOME}/bin:${PATH}"
+    - env | grep CI
   cache:
     # Cache build/cargo dependencies based on Cargo.lock changes
     - key:
