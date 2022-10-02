@@ -57,7 +57,8 @@ audit-code:
 format-code:
   stage: test
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         paths:
           - "**/*.rs"
   script:
