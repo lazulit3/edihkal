@@ -1,23 +1,42 @@
 use std::sync::Arc;
 
-use axum::{http::StatusCode, routing::get, Router};
+use aide::axum::{
+    routing::get,
+    routing::get_with,
+    ApiRouter,
+};
+use axum::{body::Body, http::StatusCode, Json, Router};
 use sqlx::PgPool;
 
 use crate::{
     configuration::{DatabaseSettings, Settings},
-    drugs::{define_drug, get_drugs},
+    drugs::{define_drug, get_drugs, define_drug_docs},
+    openapi::api_docs,
 };
 
-pub async fn app(configuration: &Settings) -> Router<PgPool> {
+pub async fn app(configuration: &Settings) -> Router<PgPool, Body> {
     let db_pool = db_pool(&configuration.database).await;
     router(db_pool).await
 }
 
-pub async fn router(db_pool: PgPool) -> Router<PgPool> {
+pub async fn router(db_pool: PgPool) -> Router<PgPool, Body> {
     let db_pool = Arc::new(db_pool);
-    Router::with_state_arc(db_pool)
-        .route("/health_check", get(|| async { StatusCode::OK }))
-        .route("/drugs", get(get_drugs).post(define_drug))
+    let mut api = api_docs();
+
+    ApiRouter::with_state_arc(db_pool)
+        .api_route(
+            "/health_check",
+            get_with(
+                || async { StatusCode::OK },
+                |op| op.response::<200, ()>(),
+            ),
+        )
+        .api_route("/drugs", get(get_drugs).post_with(define_drug, define_drug_docs))
+        .finish_api(&mut api)
+        .route(
+            "/openapi.json",
+            axum::routing::get(|| async { Json(api) }),
+        )
 }
 
 async fn db_pool(db_settings: &DatabaseSettings) -> PgPool {
