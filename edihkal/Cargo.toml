@@ -2,7 +2,7 @@
 name = "edihkal"
 version = "0.1.0"
 edition = "2021"
-description = "Server for EDIHKAL"
+description = "Server for edihkal"
 
 [dependencies]
 axum = { version = "0.5.15", default-features = false, features = ["http1"] }

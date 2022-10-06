@@ -2,7 +2,7 @@
 name = "edid"
 version = "0.1.0"
 edition = "2021"
-description = "EDID: Every Drug I Did, a CLI client for EDIHKAL."
+description = "A CLI client for edihkal."
 
 [dependencies]
 clap = { version = "4.0.10", features = ["derive"] }
