@@ -1,23 +1,8 @@
-use clap::Subcommand;
-
-#[derive(Subcommand)]
-pub enum Commands {
-    Define {
-        /// Name of a drug to define
-        name: String,
-    },
-}
-
-/// Run drugs subcommand
-pub fn run(command: &Commands) {
-    match command {
-        Commands::Define { name } => {
-            define_drug(name);
-        }
-    }
-}
+use crate::client::Client;
 
 /// Define a new drug
-fn define_drug(name: &String) {
+fn define_drug(client: &Client, name: &String) {
+    // let settings =
+    // let client = client::Client::new();
     println!("{name} has been defined.");
 }
