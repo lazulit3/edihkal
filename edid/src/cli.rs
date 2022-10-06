@@ -2,7 +2,8 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
-use crate::{client::Client, configuration::Config};
+use crate::client::Client;
+use crate::configuration::Config;
 
 /// A CLI client for edihkal
 #[derive(Parser)]
@@ -53,7 +54,7 @@ pub fn run_command(opts: Opts) {
             DrugsCommands::Define { name } => {
                 let config = Config::from(&opts);
                 let client = Client::from(&config);
-                println!("New drug {name} has been defined.");
+                client.define_drug(name);
             }
         },
     }

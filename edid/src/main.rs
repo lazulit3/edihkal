@@ -1,7 +1,6 @@
 mod cli;
 mod client;
 mod configuration;
-mod drugs;
 
 use clap::Parser;
 
