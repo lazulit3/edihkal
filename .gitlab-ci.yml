@@ -1,9 +1,10 @@
 # Only run pipelines for merge requests, scheduled pipelines, tags, and protected branches
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_IID
-    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_COMMIT_REF_PROTECTED
+    - if: $CI_COMMIT_TAG
 
 default:
   before_script:
@@ -43,12 +44,13 @@ stages:
   - test
 
 audit-code:
+  interruptible: true
   stage: test
   script:
     - cargo install cargo-audit
     - cargo audit
   rules:
-    # Only audit on nightly schedule or when merge requests change dependencies
+    # Only run for scheduled audit or when a merge request changes the lock file.
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
@@ -56,7 +58,9 @@ audit-code:
           - "**/Cargo.lock"
 
 format-code:
+  interruptible: true
   stage: test
+  # Only run when rust code changes in a merge request.
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
@@ -67,12 +71,22 @@ format-code:
     - cargo fmt --all -- --check
 
 lint-code:
+  interruptible: true
   cache:
     # Cache sqlx-cli from pinned version/features
     key: sqlx-${SQLX_VERSION}-${SQLX_FEATURES}
     paths:
       - ${CARGO_HOME}/bin/sqlx
       - ${CARGO_HOME}/bin/cargo-sqlx
+  # Only run on protected branches, tags, and when a merge request changes files that Clippy is interested in (rust code, Cargo files).
+  rules:
+    - if: $CI_COMMIT_REF_PROTECTED
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - "**/*.rs"
+          - "**/Cargo.*"
   stage: test
   script:
     # Only install sqlx-cli if not already present from cache
@@ -90,12 +104,24 @@ lint-code:
       alias: database
 
 test-code:
+  interruptible: true
   cache:
     # Cache sqlx-cli from pinned version/features
     key: sqlx-${SQLX_VERSION}-${SQLX_FEATURES}
     paths:
       - ${CARGO_HOME}/bin/sqlx
       - ${CARGO_HOME}/bin/cargo-sqlx
+  # Only on protected branches, tags, and certain file changes that warrant tests.
+  rules:
+    - if: $CI_COMMIT_REF_PROTECTED
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - "**/*.rs"
+          - "**/*.sql"
+          - "**/*.yaml"
+          - "**/Cargo.*"
   stage: test
   script:
     # Only install sqlx-cli if not already present from cache
