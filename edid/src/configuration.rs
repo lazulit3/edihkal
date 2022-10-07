@@ -1,7 +1,5 @@
 use std::path::Path;
 
-use crate::client::Client;
-
 #[derive(serde::Deserialize)]
 pub struct Config {
     pub edihkal_url: String,
@@ -31,13 +29,5 @@ impl Config {
             )
             .build()?;
         config.try_deserialize::<Config>()
-    }
-}
-
-impl From<&Config> for Client {
-    fn from(config: &Config) -> Self {
-        Client {
-            edihkal_base_url: config.edihkal_url.clone(),
-        }
     }
 }

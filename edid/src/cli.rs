@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
-use crate::client::Client;
+use crate::client::EdihkalClient;
 use crate::configuration::Config;
 
 /// A CLI client for edihkal
@@ -48,13 +48,18 @@ impl From<&Opts> for Config {
 }
 
 /// Run appropriate command based on Opts
-pub fn run_command(opts: Opts) {
+pub async fn run_command(opts: Opts) {
     match &opts.command {
         Commands::Drugs { command } => match command {
             DrugsCommands::Define { name } => {
                 let config = Config::from(&opts);
-                let client = Client::from(&config);
-                client.define_drug(name);
+                let client = EdihkalClient::from(&config);
+                match client.define_drug(name).await {
+                    Ok(_) => println!("Defined drug {}.", name),
+                    // TODO: Exit with error status.
+                    // TODO: Clear error handling / output.
+                    Err(_) => println!("Failed to define drug {}!", name),
+                }
             }
         },
     }

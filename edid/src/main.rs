@@ -4,9 +4,10 @@ mod configuration;
 
 use clap::Parser;
 
-fn main() {
+#[tokio::main(flavor = "current_thread")]
+async fn main() {
     let opts = cli::Opts::parse();
-    cli::run_command(opts);
+    cli::run_command(opts).await;
 }
 
 #[test]

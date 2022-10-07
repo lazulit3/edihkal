@@ -1,8 +1,24 @@
-//! A client to the edihkal API.
+use crate::configuration::Config;
 
+use self::api_client::ApiClient;
+
+pub mod api_client;
 pub mod drugs;
 
-pub struct Client {
-    /// Base URL of the edihkal API service.
-    pub edihkal_base_url: String,
+pub struct EdihkalClient<'a> {
+    client: ApiClient<'a>,
+}
+
+impl<'a> EdihkalClient<'a> {
+    pub fn new(edihkal_url: &'a str) -> Self {
+        EdihkalClient {
+            client: ApiClient::new(edihkal_url),
+        }
+    }
+}
+
+impl<'a> From<&'a Config> for EdihkalClient<'a> {
+    fn from(config: &'a Config) -> Self {
+        EdihkalClient::new(&config.edihkal_url)
+    }
 }
