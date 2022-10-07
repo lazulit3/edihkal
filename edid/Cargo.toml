@@ -7,6 +7,7 @@ description = "A CLI client for edihkal."
 [dependencies]
 clap = { version = "4.0.10", features = ["derive"] }
 config = { version = "0.13.2", default-features = false, features = ["yaml"] }
+edihkal-core = { version = "0.1.0", path = "../edihkal-core" }
 reqwest = { version = "0.11.11", default-features = false, features = ["rustls-tls"] }
 serde = { version = "1.0.145", features = ["derive"] }
 tokio = { version = "1.20.1", features = ["macros", "rt"] }

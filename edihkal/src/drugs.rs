@@ -1,14 +1,9 @@
 use std::sync::Arc;
 
 use axum::{http::StatusCode, Extension, Json};
-use serde::Deserialize;
+use edihkal_core::drugs::Drug;
 use sqlx::PgPool;
 use uuid::Uuid;
-
-#[derive(Deserialize)]
-pub struct Drug {
-    name: String,
-}
 
 pub async fn get_drugs() -> StatusCode {
     StatusCode::OK

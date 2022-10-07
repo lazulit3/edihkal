@@ -1,13 +1,7 @@
+use edihkal_core::drugs::Drug;
 use reqwest::Response;
-use serde::Serialize;
 
 use super::EdihkalClient;
-
-// TODO: DRY refactor
-#[derive(Serialize)]
-pub struct Drug {
-    name: String,
-}
 
 impl EdihkalClient<'_> {
     /// Define a new drug in edihkal.

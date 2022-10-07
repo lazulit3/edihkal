@@ -380,6 +380,7 @@ dependencies = [
  "axum-test-helper",
  "clap",
  "config",
+ "edihkal-core",
  "reqwest",
  "serde",
  "tokio",
@@ -392,12 +393,21 @@ dependencies = [
  "axum 0.5.16",
  "axum-test-helper",
  "config",
+ "edihkal-core",
  "reqwest",
  "serde",
  "serde_json",
  "sqlx",
  "tokio",
  "uuid",
+]
+
+[[package]]
+name = "edihkal-core"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -1319,9 +1329,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.85"
+version = "1.0.86"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e55a28e3aaef9d5ce0506d0a14dbba8054ddc7e499ef522dd8b26859ec9d4a44"
+checksum = "41feea4228a6f1cd09ec7a3593a682276702cd67b5273544757dae23c096f074"
 dependencies = [
  "itoa",
  "ryu",
