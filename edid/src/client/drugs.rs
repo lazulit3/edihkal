@@ -1,9 +1,9 @@
 use edihkal_core::drugs::Drug;
 use reqwest::Response;
 
-use super::EdihkalClient;
+use super::Client;
 
-impl EdihkalClient<'_> {
+impl Client<'_> {
     /// Define a new drug in edihkal.
     pub async fn define_drug(self, name: &str) -> Result<Response, reqwest::Error> {
         let drug = Drug {

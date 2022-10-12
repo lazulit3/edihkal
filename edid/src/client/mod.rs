@@ -5,20 +5,20 @@ use self::api_client::ApiClient;
 pub mod api_client;
 pub mod drugs;
 
-pub struct EdihkalClient<'a> {
-    client: ApiClient<'a>,
+pub struct Client<'c> {
+    client: ApiClient<'c>,
 }
 
-impl<'a> EdihkalClient<'a> {
-    pub fn new(edihkal_url: &'a str) -> Self {
-        EdihkalClient {
+impl Client<'_> {
+    pub fn new(edihkal_url: &str) -> Client {
+        Client {
             client: ApiClient::new(edihkal_url),
         }
     }
 }
 
-impl<'a> From<&'a Config> for EdihkalClient<'a> {
-    fn from(config: &'a Config) -> Self {
-        EdihkalClient::new(&config.edihkal_url)
+impl<'c> From<&'c Config> for Client<'c> {
+    fn from(config: &'c Config) -> Self {
+        Client::new(&config.edihkal_url)
     }
 }
