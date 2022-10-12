@@ -51,3 +51,9 @@ impl From<&Opts> for Config {
         .expect("Failed to load configuration")
     }
 }
+
+impl<'c> From<&'c Config> for Client<'c> {
+    fn from(config: &'c Config) -> Self {
+        Self::new(&config.edihkal_url)
+    }
+}

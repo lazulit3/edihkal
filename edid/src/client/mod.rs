@@ -1,5 +1,3 @@
-use crate::config::Config;
-
 use self::api_client::ApiClient;
 
 pub mod api_client;
@@ -14,11 +12,5 @@ impl Client<'_> {
         Client {
             client: ApiClient::new(edihkal_url),
         }
-    }
-}
-
-impl<'c> From<&'c Config> for Client<'c> {
-    fn from(config: &'c Config) -> Self {
-        Client::new(&config.edihkal_url)
     }
 }
