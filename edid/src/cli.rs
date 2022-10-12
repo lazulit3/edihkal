@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 
 use crate::client::EdihkalClient;
-use crate::configuration::Config;
+use crate::config::Config;
 
 /// A CLI client for edihkal
 #[derive(Parser)]

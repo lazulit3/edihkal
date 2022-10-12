@@ -1,4 +1,4 @@
-use crate::configuration::Config;
+use crate::config::Config;
 
 use self::api_client::ApiClient;
 
