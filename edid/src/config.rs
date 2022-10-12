@@ -1,5 +1,7 @@
 use std::path::Path;
 
+use crate::cli::Opts;
+
 #[derive(serde::Deserialize)]
 pub struct Config {
     pub edihkal_url: String,
@@ -29,5 +31,17 @@ impl Config {
             )
             .build()?;
         config.try_deserialize::<Config>()
+    }
+}
+
+/// Load `Config` appropriately depending on whether a config file is included in CLI `Opts`.
+impl From<&Opts> for Config {
+    fn from(opts: &Opts) -> Self {
+        if let Some(config_path) = opts.config_path() {
+            Config::load_with_config_file(config_path)
+        } else {
+            Config::load()
+        }
+        .expect("Failed to load configuration")
     }
 }

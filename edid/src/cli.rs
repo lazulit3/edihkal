@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use clap::{Parser, Subcommand};
 
@@ -10,7 +10,7 @@ use crate::{client::Client, config::Config};
 pub struct Opts {
     /// Use a config file
     #[arg(short, long, value_name = "FILE")]
-    config: Option<PathBuf>,
+    pub config: Option<PathBuf>,
 
     /// Command to run
     #[command(subcommand)]
@@ -35,14 +35,10 @@ enum DrugsCommands {
     },
 }
 
-impl From<&Opts> for Config {
-    fn from(opts: &Opts) -> Self {
-        if let Some(config_path) = opts.config.as_deref() {
-            Config::load_with_config_file(config_path)
-        } else {
-            Config::load()
-        }
-        .expect("Failed to load configuration")
+impl Opts {
+    /// Returns Path of config file parsed from CLI options (if specified).
+    pub fn config_path(&self) -> Option<&Path> {
+        self.config.as_deref()
     }
 }
 
