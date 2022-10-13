@@ -1,5 +1,6 @@
 use std::path::Path;
 use serde::Deserialize;
+use url::Url;
 
 use crate::{cli::Opts, client::Client};
 
@@ -7,7 +8,7 @@ use crate::{cli::Opts, client::Client};
 /// Configuration for edid loaded from `EDID_*` environment variables and an optional config file.
 #[derive(Deserialize)]
 pub struct Config {
-    pub edihkal_url: String,
+    edihkal_url: Url,
 }
 
 impl Config {

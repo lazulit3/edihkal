@@ -8,10 +8,11 @@ description = "A CLI client for edihkal."
 clap = { version = "4.0.10", features = ["derive"] }
 config = { version = "0.13.2", default-features = false, features = ["yaml"] }
 edihkal-core = { version = "0.1.0", path = "../edihkal-core" }
-reqwest = { version = "0.11.11", default-features = false, features = ["rustls-tls"] }
+reqwest = { version = "0.11.11", default-features = false, features = ["rustls-tls", "json"] }
 serde = { version = "1.0.145", features = ["derive"] }
+thiserror = "1.0.37"
 tokio = { version = "1.20.1", features = ["macros", "rt"] }
-url = "2.3.1"
+url = { version = "2.3.1", features = ["serde"] }
 
 [dev-dependencies]
 axum = { version = "0.6.0-rc.2", default-features = false, features = ["http1"] }
