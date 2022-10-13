@@ -15,5 +15,5 @@ tokio = { version = "1.20.1", features = ["macros", "rt"] }
 url = { version = "2.3.1", features = ["serde"] }
 
 [dev-dependencies]
-axum = { version = "0.6.0-rc.2", default-features = false, features = ["http1"] }
-axum-test-helper = "0.1.1"
+rstest = "0.15.0"
+wiremock = "0.5.15"

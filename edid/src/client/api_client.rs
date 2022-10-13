@@ -74,16 +74,48 @@ impl ApiClient<'_> {
 
 #[cfg(test)]
 mod tests {
-    use axum::http::StatusCode;
-    use axum::routing::get;
-    use axum::Router;
-    use axum_test_helper::TestClient;
+    use rstest::rstest;
+    use url::Url;
+    use wiremock::{
+        matchers::{method, path},
+        Mock, MockServer, ResponseTemplate,
+    };
 
+    use super::ApiClient;
+
+    // Test all supported HTTP methods using a relative path
+    #[rstest]
     #[tokio::test]
-    async fn test_get_request() {
-        let app = Router::new().route("/", get(|| async {}));
-        let client = TestClient::new(app);
-        let res = client.get("/").send().await;
-        assert_eq!(res.status(), StatusCode::OK);
+    async fn test_http_methods_with_relative_paths(
+        #[values("GET", "DELETE", "HEAD", "PATCH", "POST", "PUT")] http_method: &str,
+        #[values("/", "/foo/bar")] test_path: &str,
+    ) {
+        let mock_server = MockServer::start().await;
+
+        // Expect 1x http_method request to test_path
+        Mock::given(method(http_method))
+            .and(path(test_path))
+            .respond_with(ResponseTemplate::new(200))
+            .expect(1)
+            .mount(&mock_server)
+            .await;
+
+        // Configure an ApiClient with base_url of the mock_server
+        let base_url = Url::parse(&mock_server.uri()).unwrap();
+        let client = ApiClient::new(&base_url);
+
+        // Select the appropriate ApiClient method to test
+        let client_method = match http_method {
+            "GET" => ApiClient::get,
+            "DELETE" => ApiClient::delete,
+            "HEAD" => ApiClient::head,
+            "PATCH" => ApiClient::patch,
+            "POST" => ApiClient::post,
+            "PUT" => ApiClient::put,
+            _ => panic!(),
+        };
+
+        // Call the method with a relative path; Mock expects a single call to this path.
+        client_method(&client, test_path).send().await.unwrap();
     }
 }
