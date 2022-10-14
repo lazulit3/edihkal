@@ -5,6 +5,7 @@ use url::Url;
 /// paths against a configured `base_url`.
 ///
 /// When a request method is passed a relative URL path, `ApiClient` joins the relative path to its configured `base_url`.
+#[derive(Debug)]
 pub(super) struct ApiClient<'u> {
     /// The base URL that all relative paths joined to before sending a request.
     base_url: &'u Url,

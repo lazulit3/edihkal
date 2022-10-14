@@ -8,6 +8,7 @@ use edihkal_core::drugs::Drug;
 use self::api_client::ApiClient;
 use self::error::Error;
 
+#[derive(Debug)]
 pub struct Client<'c> {
     api: ApiClient<'c>,
 }
