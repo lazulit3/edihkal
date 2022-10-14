@@ -92,6 +92,10 @@ mod tests {
     ) {
         let mock_server = MockServer::start().await;
 
+        // Configure an ApiClient with base_url of the mock_server
+        let base_url = Url::parse(&mock_server.uri()).unwrap();
+        let client = ApiClient::new(&base_url).unwrap();
+
         // Expect 1x http_method request to test_path
         Mock::given(method(http_method))
             .and(path(test_path))
@@ -99,10 +103,6 @@ mod tests {
             .expect(1)
             .mount(&mock_server)
             .await;
-
-        // Configure an ApiClient with base_url of the mock_server
-        let base_url = Url::parse(&mock_server.uri()).unwrap();
-        let client = ApiClient::new(&base_url);
 
         // Select the appropriate ApiClient method to test
         let client_method = match http_method {
