@@ -1,4 +1,4 @@
-mod api_client;
+pub mod api_client;
 mod error;
 
 use url::Url;
@@ -19,9 +19,9 @@ impl Client<'_> {
     /// # Panics
     /// This method panics if `reqwest::Client::new()` fails to build with defaults.
     /// See [`reqwest::Client::new()`] for details.
-    pub fn new(base_url: &Url) -> Client {
-        let api = ApiClient::new(base_url);
-        Client { api }
+    pub fn new(base_url: &Url) -> Result<Client, api_client::Error> {
+        let api = ApiClient::new(base_url)?;
+        Ok(Client { api })
     }
 
     pub async fn define_drug(&self, name: &str) -> Result<(), Error> {

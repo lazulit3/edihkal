@@ -48,7 +48,8 @@ pub async fn run_command(opts: Opts) {
         Commands::Drugs { command } => match command {
             DrugsCommands::Define { name } => {
                 let config = Config::from(&opts);
-                let client = Client::from(&config);
+                let client =
+                    Client::try_from(&config).expect("Failed to configure edihkal API client");
                 match client.define_drug(name).await {
                     Ok(_) => println!("Defined drug {}.", name),
                     // TODO: Exit with error status.

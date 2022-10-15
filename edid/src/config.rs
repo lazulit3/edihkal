@@ -1,9 +1,9 @@
-use std::path::Path;
 use serde::Deserialize;
+use std::path::Path;
 use url::Url;
 
+use crate::client::api_client;
 use crate::{cli::Opts, client::Client};
-
 
 /// Configuration for edid loaded from `EDID_*` environment variables and an optional config file.
 #[derive(Deserialize)]
@@ -53,8 +53,10 @@ impl From<&Opts> for Config {
     }
 }
 
-impl<'c> From<&'c Config> for Client<'c> {
-    fn from(config: &'c Config) -> Self {
+impl<'c> TryFrom<&'c Config> for Client<'c> {
+    type Error = api_client::Error;
+
+    fn try_from(config: &'c Config) -> Result<Self, Self::Error> {
         Self::new(&config.edihkal_url)
     }
 }

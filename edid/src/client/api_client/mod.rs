@@ -1,3 +1,7 @@
+mod error;
+
+pub use error::Error;
+
 use reqwest::RequestBuilder;
 use url::Url;
 
@@ -16,23 +20,37 @@ pub(super) struct ApiClient<'u> {
 impl ApiClient<'_> {
     /// Construct an `ApiClient` for `base_url`.
     ///
+    /// # Errors
+    /// Returns [`Error::UnexpectedBaseUrl`] if the `base_url` ends in a path without a trailing slash (/).
+    /// This is to avoid unexpected behavior where `Url::join()` treats the last path segment as a file and drops it
+    /// when joining the `base_url` and the request's `endpoint_path`.
+    ///
     /// # Panics
     /// This method panics if `reqwest::Client::new()` fails to build with defaults.
     /// See [`reqwest::Client::new()`] for details.
-    pub fn new(base_url: &Url) -> ApiClient {
+    pub fn new(base_url: &Url) -> Result<ApiClient, Error> {
+        ApiClient::is_valid_base_url(base_url)?;
+
         let client = reqwest::Client::new();
-        ApiClient {
+        Ok(ApiClient {
             base_url,
             inner: client,
-        }
+        })
     }
 
     /// Construct an `ApiClient` for `base_url` that uses an explicit `reqwest::Client`.
-    pub fn with_client(base_url: &Url, client: reqwest::Client) -> ApiClient {
-        ApiClient {
+    ///
+    /// # Errors
+    /// Returns [`Error::UnexpectedBaseUrl`] if the `base_url` ends in a path without a trailing slash (/).
+    /// This is to avoid unexpected behavior where `Url::join()` treats the last path segment as a file and drops it
+    /// when joining the `base_url` and the request's `endpoint_path`.
+    pub fn with_client(base_url: &Url, client: reqwest::Client) -> Result<ApiClient, Error> {
+        ApiClient::is_valid_base_url(base_url)?;
+
+        Ok(ApiClient {
             base_url,
             inner: client,
-        }
+        })
     }
 
     /// Make a `GET` request to a relative `endpoint_path` joined to the `ApiClient` base URL.
@@ -65,9 +83,30 @@ impl ApiClient<'_> {
         self.inner.put(self.to_endpoint_url(endpoint_path))
     }
 
-    /// Returns absolute URL for an API endpoint given the `endpoint_path` to join with the `ApiClient`'s `base_url`.
-    fn to_endpoint_url(&self, endpoint_path: &str) -> Url {
+    /// Returns the base URL that the `ApiClient` is configured to append request `endpoint_path`s to.
+    pub fn base_url(&self) -> &Url {
+        self.base_url
+    }
+
+    /// Returns an absolute URL for an API `endpoint_path` by joining the path to the `ApiClient`'s `base_url`.
+    pub fn to_endpoint_url(&self, endpoint_path: &str) -> Url {
         self.base_url.join(endpoint_path).unwrap()
+    }
+
+    /// Returns an [`Error::UnexpectedBaseUrl`] if `base_url` does not end with a trailing slash.
+    ///
+    /// Although a URL such as `https://myservice.net/hello/world` is indeed a valid base URL from the perspective of
+    /// the [`url`] crate, `ApiClient` considers this an error because there is no trailing slash (`/hello/world/`).
+    /// Applying [`Url::join()`] to this base would drop `world` because `world` is interpeted as a file name in
+    /// the path.
+    ///
+    /// `ApiClient` holds this opinion to avoid possibly unexpected behavior.
+    pub fn is_valid_base_url(base_url: &Url) -> Result<(), Error> {
+        if !base_url.path().ends_with("/") {
+            Err(Error::UnexpectedBaseUrl)
+        } else {
+            Ok(())
+        }
     }
 }
 
