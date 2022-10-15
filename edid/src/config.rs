@@ -1,9 +1,9 @@
+use anyhow::{Context, Result};
 use serde::Deserialize;
 use std::path::Path;
 use url::Url;
 
-use crate::client::api_client;
-use crate::{cli::Opts, client::Client};
+use crate::cli::Opts;
 
 /// Configuration for edid loaded from `EDID_*` environment variables and an optional config file.
 #[derive(Deserialize)]
@@ -13,7 +13,7 @@ pub struct Config {
 
 impl Config {
     /// Returns `Config` loaded from `EDID_*` environment variables only.
-    fn load() -> Result<Self, config::ConfigError> {
+    fn load() -> Result<Self> {
         let config = config::Config::builder()
             .add_source(
                 config::Environment::with_prefix("EDID")
@@ -21,14 +21,16 @@ impl Config {
                     .separator("__"),
             )
             .build()?;
-        config.try_deserialize::<Self>()
+        config
+            .try_deserialize::<Self>()
+            .context("Failed to deserialize configuration from environment variables")
     }
 
     /// Returns `Config` loaded from config file and `EDID_*` environment variables.
     ///
     /// If a configuration is defined in both the config file and an environment variable,
     /// the environment variable will take precedence.
-    fn load_with_config_file(config_path: &Path) -> Result<Self, config::ConfigError> {
+    fn load_with_config_file(config_path: &Path) -> Result<Self> {
         let config = config::Config::builder()
             .add_source(config::File::from(config_path))
             .add_source(
@@ -37,7 +39,9 @@ impl Config {
                     .separator("__"),
             )
             .build()?;
-        config.try_deserialize::<Self>()
+        config.try_deserialize::<Self>().context(
+            "Failed to deserialize configuration from environment variables and/or config file",
+        )
     }
 }
 
