@@ -55,32 +55,32 @@ impl ApiClient<'_> {
 
     /// Make a `GET` request to a relative `endpoint_path` joined to the `ApiClient` base URL.
     pub fn get(&self, endpoint_path: &str) -> RequestBuilder {
-        self.inner.get(self.to_endpoint_url(endpoint_path))
+        self.inner.get(self.endpoint_url(endpoint_path))
     }
 
     /// Make a `DELETE` request to a relative `endpoint_path` joined to the `ApiClient` base URL.
     pub fn delete(&self, endpoint_path: &str) -> RequestBuilder {
-        self.inner.delete(self.to_endpoint_url(endpoint_path))
+        self.inner.delete(self.endpoint_url(endpoint_path))
     }
 
     /// Make a `HEAD` request to a relative `endpoint_path` joined to the `ApiClient` base URL.
     pub fn head(&self, endpoint_path: &str) -> RequestBuilder {
-        self.inner.head(self.to_endpoint_url(endpoint_path))
+        self.inner.head(self.endpoint_url(endpoint_path))
     }
 
     /// Make a `PATCH` request to a relative `endpoint_path` joined to the `ApiClient` base URL.
     pub fn patch(&self, endpoint_path: &str) -> RequestBuilder {
-        self.inner.patch(self.to_endpoint_url(endpoint_path))
+        self.inner.patch(self.endpoint_url(endpoint_path))
     }
 
     /// Make a `POST` request to a relative `endpoint_path` joined to the `ApiClient` base URL.
     pub fn post(&self, endpoint_path: &str) -> RequestBuilder {
-        self.inner.post(self.to_endpoint_url(endpoint_path))
+        self.inner.post(self.endpoint_url(endpoint_path))
     }
 
     /// Make a `PUT` request to a relative `endpoint_path` joined to the `ApiClient` base URL.
     pub fn put(&self, endpoint_path: &str) -> RequestBuilder {
-        self.inner.put(self.to_endpoint_url(endpoint_path))
+        self.inner.put(self.endpoint_url(endpoint_path))
     }
 
     /// Returns the base URL that the `ApiClient` is configured to append request `endpoint_path`s to.
@@ -89,7 +89,7 @@ impl ApiClient<'_> {
     }
 
     /// Returns an absolute URL for an API `endpoint_path` by joining the path to the `ApiClient`'s `base_url`.
-    pub fn to_endpoint_url(&self, endpoint_path: &str) -> Url {
+    pub fn endpoint_url(&self, endpoint_path: &str) -> Url {
         self.base_url.join(endpoint_path).unwrap()
     }
 
