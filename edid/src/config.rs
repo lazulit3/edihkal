@@ -56,11 +56,3 @@ impl From<&Opts> for Config {
         .expect("Failed to load configuration")
     }
 }
-
-impl<'c> TryFrom<&'c Config> for Client<'c> {
-    type Error = api_client::Error;
-
-    fn try_from(config: &'c Config) -> Result<Self, Self::Error> {
-        Self::new(&config.edihkal_url)
-    }
-}
