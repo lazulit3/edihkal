@@ -8,7 +8,7 @@ use crate::cli::Opts;
 /// Configuration for edid loaded from `EDID_*` environment variables and an optional config file.
 #[derive(Deserialize)]
 pub struct Config {
-    edihkal_url: Url,
+    pub edihkal_url: Url,
 }
 
 impl Config {

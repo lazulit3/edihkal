@@ -1,12 +1,12 @@
-pub mod api_client;
-mod error;
-
 use url::Url;
 
 use edihkal_core::drugs::Drug;
 
-use self::api_client::ApiClient;
-use self::error::Error;
+pub mod api_client;
+pub mod error;
+
+use api_client::ApiClient;
+use error::Error;
 
 #[derive(Debug)]
 pub struct Client<'c> {
@@ -19,7 +19,7 @@ impl Client<'_> {
     /// # Panics
     /// This method panics if `reqwest::Client::new()` fails to build with defaults.
     /// See [`reqwest::Client::new()`] for details.
-    pub fn new(base_url: &Url) -> Result<Client, api_client::Error> {
+    pub fn new(base_url: &Url) -> Result<Client, api_client::BaseUrlError> {
         let api = ApiClient::new(base_url)?;
         Ok(Client { api })
     }
