@@ -2,8 +2,9 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
+use edihkal_client::Client;
 
-use crate::{client::Client, config::Config};
+use crate::config::Config;
 
 /// A CLI client for edihkal
 #[derive(Parser)]
@@ -49,6 +50,8 @@ pub async fn run_command(opts: Opts) -> Result<(), anyhow::Error> {
         Commands::Drugs { command } => match command {
             DrugsCommands::Define { name } => {
                 let config = Config::from(&opts);
+
+                /*
                 let client = Client::new(&config.edihkal_url)
                     .context("Failed to build API client with the configured base URL")?;
 
@@ -56,6 +59,7 @@ pub async fn run_command(opts: Opts) -> Result<(), anyhow::Error> {
                     .define_drug(name)
                     .await
                     .context("Failed to define drug")?;
+                */
 
                 Ok(())
             }

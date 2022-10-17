@@ -1,5 +1,4 @@
 mod cli;
-mod client;
 mod config;
 
 use anyhow::Result;
