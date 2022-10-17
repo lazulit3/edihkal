@@ -2,7 +2,7 @@
 name = "edihkal-client"
 version = "0.1.0"
 edition = "2021"
-description = "Core library for the edihkal project."
+description = "Client for edihkal API."
 
 [dependencies]
 serde = { version = "1.0.144", features = ["derive"] }
