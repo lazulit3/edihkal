@@ -417,7 +417,6 @@ dependencies = [
  "serde",
  "thiserror",
  "tokio",
- "url",
  "wiremock",
 ]
 
