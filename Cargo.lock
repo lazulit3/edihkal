@@ -410,6 +410,7 @@ dependencies = [
  "anyhow",
  "clap",
  "config",
+ "edihkal-client",
  "edihkal-core",
  "reqwest",
  "rstest",
