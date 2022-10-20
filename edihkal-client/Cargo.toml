@@ -9,3 +9,4 @@ edihkal-core = { version = "0.1.0", path = "../edihkal-core" }
 serde = { version = "1.0.144", features = ["derive"] }
 serde_json = "1.0.86"
 thiserror = "1.0.37"
+ureq = { version = "2.5.0", default-features = false, features = ["tls", "json"] }
