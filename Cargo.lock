@@ -434,6 +434,7 @@ dependencies = [
 name = "edihkal-client"
 version = "0.1.0"
 dependencies = [
+ "edihkal-core",
  "serde",
  "serde_json",
  "thiserror",
