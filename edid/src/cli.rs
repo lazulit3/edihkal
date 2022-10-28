@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use edihkal_client::Client;
+use edihkal_core::drugs::Drug;
 
 use crate::config::Config;
 
@@ -50,17 +51,10 @@ pub async fn run_command(opts: Opts) -> Result<(), anyhow::Error> {
         Commands::Drugs { command } => match command {
             DrugsCommands::Define { name } => {
                 let config = Config::from(&opts);
-
-                /*
-                let client = Client::new(&config.edihkal_url)
-                    .context("Failed to build API client with the configured base URL")?;
-
-                client
-                    .define_drug(name)
-                    .await
-                    .context("Failed to define drug")?;
-                */
-
+                let client = Client::new(&config.edihkal_url);
+                let response = client.create_drug(name).context("Failed to define drug")?;
+                let drug: Drug = response.data;
+                println!("{} has been defined.", drug.name);
                 Ok(())
             }
         },
