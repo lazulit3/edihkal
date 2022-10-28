@@ -12,7 +12,7 @@ use crate::config::Config;
 #[command(author, version, about, long_about = None)]
 pub struct Opts {
     /// Use a config file
-    #[arg(short, long, value_name = "FILE")]
+    #[arg(short, long, value_name = "FILE", default_value = "edid.yaml")]
     pub config: Option<PathBuf>,
 
     /// Command to run
