@@ -10,7 +10,6 @@ config = { version = "0.13.2", default-features = false, features = ["yaml"] }
 serde = "1.0.145"
 edihkal-core = { version = "0.1.0", path = "../edihkal-core" }
 serde_json = "1.0.85"
-sqlx = { version = "0.6.1", features = ["runtime-tokio-rustls", "postgres", "macros", "uuid", "migrate", "offline"], default-features = false }
 tokio = { version = "1.20.1", features = ["macros"] }
 uuid = { version = "1.1.2", features = ["v4"] }
 
