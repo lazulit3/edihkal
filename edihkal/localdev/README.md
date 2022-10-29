@@ -4,7 +4,7 @@
 
 `init_db.sh` can be run to setup a database container for edihkal for local development use.
 
-### Requirements for Runnning `init_db.sh`
+### Requirements for Running `init_db.sh`
 
 * Install `pg_isready` to detect when the database service finishes initializing before continuing setup.
 * Install `sqlx-cli` to configure the database (i.e. run migrations) after database is running. To install `sqlx-cli` you may run:
