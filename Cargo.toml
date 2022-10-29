@@ -1,2 +1,2 @@
 [workspace]
-members = ["edid", "edihkal", "edihkal-client", "edihkal-core"]
+members = ["edid", "edihkal", "edihkal-client", "edihkal/entity", "edihkal-core", "edihkal/migration"]
