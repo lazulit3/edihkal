@@ -1,8 +1,9 @@
 [package]
 name = "edid"
 version = "0.1.0"
-edition = "2021"
 description = "A CLI client for edihkal."
+edition.repository = true
+edition.workspace = true
 
 [dependencies]
 anyhow = "1.0.65"

@@ -1,21 +1,23 @@
 [package]
 name = "edihkal"
 version = "0.1.0"
-edition = "2021"
 description = "Server for edihkal"
+edition.repository = true
+edition.workspace = true
 
 [dependencies]
 axum = { version = "0.5.15", default-features = false, features = ["http1"] }
 config = { version = "0.13.2", default-features = false, features = ["yaml"] }
 serde = "1.0.145"
-edihkal-core = { version = "0.1.0", path = "../edihkal-core" }
 serde_json = "1.0.85"
 tokio = { version = "1.20.1", features = ["macros"] }
 uuid = { version = "1.1.2", features = ["v4"] }
 sea-orm = { version = "0.10.1", default-features = false, features = ["macros", "with-json", "with-uuid", "sqlx-postgres", "runtime-tokio-rustls"] }
 
-[dev-dependencies]
-axum-test-helper = "0.1.1"
+edihkal-core = { version = "0.1.0", path = "../edihkal-core" }
 entity = { path = "entity" }
 migration = { path = "migration" }
+
+[dev-dependencies]
+axum-test-helper = "0.1.1"
 reqwest = { version = "0.11.11", default-features = false, features = ["rustls-tls"] }

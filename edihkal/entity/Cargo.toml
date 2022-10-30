@@ -1,11 +1,13 @@
 [package]
 name = "entity"
 version = "0.1.0"
-edition = "2021"
+publish = false
+edition.workspace = true
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies]
+serde = "1.0.145"
 
 [dependencies.sea-orm]
 default-features = false
-publish = false
+features = ["macros", "with-uuid"]
 version = "0.10.1"
