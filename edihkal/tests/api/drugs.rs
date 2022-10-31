@@ -42,6 +42,6 @@ async fn define_drug_returns_400_for_missing_data() {
 #[ignore]
 #[tokio::test]
 async fn get_drugs_returns_list_of_drugs() {
-    let client = test_client().await;
+    let _client = test_client().await;
     todo!()
 }
