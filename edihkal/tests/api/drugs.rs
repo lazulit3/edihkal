@@ -1,13 +1,13 @@
 use crate::helpers::{test_client, test_client_and_db};
 use axum::http::StatusCode;
-use edihkal_core::drugs::Drug;
+use edihkal_core::drugs::{Drug, DrugInputs};
 use sqlx::query_as;
 
 #[tokio::test]
 async fn define_drug_returns_200_for_valid_data() {
     let (client, db_pool) = test_client_and_db().await;
 
-    let drug = Drug::new("caffeine");
+    let drug = DrugInputs::new("caffeine");
 
     let response = client
         .post("/drugs")
@@ -18,7 +18,7 @@ async fn define_drug_returns_200_for_valid_data() {
 
     assert_eq!(response.status(), StatusCode::OK);
 
-    let saved_drug = query_as!(Drug, "SELECT name FROM drugs",)
+    let saved_drug = query_as!(Drug, "SELECT id, name FROM drugs",)
         .fetch_one(&db_pool)
         .await
         .expect("Failed to fetch defined drug.");

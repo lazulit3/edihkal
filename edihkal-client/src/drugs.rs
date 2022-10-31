@@ -1,4 +1,4 @@
-use edihkal_core::drugs::Drug;
+use edihkal_core::drugs::{Drug, DrugInputs};
 
 use crate::{
     edihkal::{Client, Endpoint, Response},
@@ -15,7 +15,7 @@ impl Client<'_> {
     pub fn create_drug(&self, name: &str) -> Result<Response<Drug>, Error> {
         let name = name.to_string();
         let path = "/drugs";
-        let payload = Drug { name };
+        let payload = DrugInputs::new(name);
         match serde_json::to_value(payload) {
             Ok(json) => self.post::<DrugEndpoint>(path, json),
             Err(_) => Err(Error::Deserialization(String::from(
