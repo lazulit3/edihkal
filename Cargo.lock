@@ -412,7 +412,6 @@ dependencies = [
  "config",
  "edihkal-client",
  "edihkal-core",
- "reqwest",
  "rstest",
  "serde",
  "thiserror",
