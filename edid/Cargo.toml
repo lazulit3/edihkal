@@ -1,8 +1,21 @@
 [package]
 name = "edid"
 version = "0.1.0"
-edition = "2021"
-description = "EDID: Every Drug I Did, a CLI client for EDIHKAL."
+description = "A CLI client for edihkal."
+edition.repository = true
+edition.workspace = true
 
 [dependencies]
-clap = { version = "4.0.0-rc.3", features = ["derive"] }
+anyhow = "1.0.65"
+clap = { version = "4.0.10", features = ["derive"] }
+config = { version = "0.13.2", default-features = false, features = ["yaml"] }
+edihkal-client = { version = "0.1.0", path = "../edihkal-client" }
+edihkal-core = { version = "0.1.0", path = "../edihkal-core" }
+reqwest = { version = "0.11.11", default-features = false, features = ["rustls-tls", "json"] }
+serde = { version = "1.0.145", features = ["derive"] }
+thiserror = "1.0.37"
+tokio = { version = "1.20.1", features = ["macros", "rt"] }
+
+[dev-dependencies]
+rstest = "0.15.0"
+wiremock = "0.5.15"

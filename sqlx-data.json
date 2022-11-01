@@ -1,9 +1,23 @@
 {
   "db": "PostgreSQL",
-  "e0089f8d0f8896245fe258a0ead6676dd736474b4df2b73866c58a4d1e0b9583": {
+  "7df6611bcadb00b595197bc6f152a8af5cac536c52ed02913fa2274387204bd1": {
     "describe": {
-      "columns": [],
-      "nullable": [],
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
       "parameters": {
         "Left": [
           "Uuid",
@@ -11,6 +25,6 @@
         ]
       }
     },
-    "query": "\n        INSERT INTO drugs (id, name)\n        VALUES ($1, $2)\n        "
+    "query": "\n        INSERT INTO drugs (id, name)\n        VALUES ($1, $2)\n        RETURNING *\n        "
   }
 }

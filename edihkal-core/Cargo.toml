@@ -1,0 +1,11 @@
+[package]
+name = "edihkal-core"
+version = "0.1.0"
+description = "Core library for all facets of edihkal (spanning client, server, etc.)"
+edition.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde = { version = "1.0.144", features = ["derive"] }
+serde_json = "1.0.86"
+uuid = { version = "1.1.2", features = ["serde", "v4"] }

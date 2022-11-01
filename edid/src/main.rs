@@ -1,43 +1,17 @@
-use clap::{Parser, Subcommand};
+mod cli;
+mod config;
 
-#[derive(Parser)]
-#[command(author, version, about, long_about = None)]
-struct Cli {
-    #[command(subcommand)]
-    command: Option<Commands>,
-}
+use anyhow::Result;
+use clap::Parser;
 
-#[derive(Subcommand)]
-enum Commands {
-    Drugs {
-        #[command(subcommand)]
-        drugs_command: Option<DrugsCommands>,
-    },
-}
-
-#[derive(Subcommand)]
-enum DrugsCommands {
-    Define {
-        /// Name of a drug to define
-        name: String,
-    },
-}
-
-fn main() {
-    let cli = Cli::parse();
-
-    match &cli.command {
-        Some(Commands::Drugs { drugs_command }) => {
-            if let Some(DrugsCommands::Define { name }) = drugs_command {
-                println!("{name} has been defined.");
-            }
-        }
-        None => {}
-    }
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<()> {
+    let opts = cli::Opts::parse();
+    cli::run_command(opts).await
 }
 
 #[test]
 fn verify_cli() {
     use clap::CommandFactory;
-    Cli::command().debug_assert()
+    cli::Opts::command().debug_assert()
 }

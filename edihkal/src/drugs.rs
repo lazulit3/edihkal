@@ -1,14 +1,9 @@
 use std::sync::Arc;
 
 use axum::{http::StatusCode, Extension, Json};
-use serde::Deserialize;
+use edihkal_core::drugs::{Drug, DrugInputs};
 use sqlx::PgPool;
 use uuid::Uuid;
-
-#[derive(Deserialize)]
-pub struct Drug {
-    name: String,
-}
 
 pub async fn get_drugs() -> StatusCode {
     StatusCode::OK
@@ -16,23 +11,31 @@ pub async fn get_drugs() -> StatusCode {
 
 pub async fn define_drug(
     Extension(db_pool): Extension<Arc<PgPool>>,
-    Json(drug): Json<Drug>,
-) -> StatusCode {
-    match sqlx::query!(
+    Json(drug): Json<DrugInputs>,
+) -> Result<Json<Drug>, StatusCode> {
+    // Construct Drug with random id from payload.
+    let drug = Drug {
+        id: Uuid::new_v4(),
+        name: drug.name,
+    };
+
+    match sqlx::query_as!(
+        Drug,
         r#"
         INSERT INTO drugs (id, name)
         VALUES ($1, $2)
+        RETURNING *
         "#,
-        Uuid::new_v4(),
+        drug.id,
         drug.name
     )
-    .execute(db_pool.as_ref())
+    .fetch_one(db_pool.as_ref())
     .await
     {
-        Ok(_) => StatusCode::OK,
+        Ok(drug) => Ok(Json(drug)),
         Err(e) => {
             println!("Failed to execute query: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
         }
     }
 }
