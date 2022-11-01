@@ -1,3 +1,5 @@
+use anyhow::{Context, Result};
+
 #[derive(serde::Deserialize)]
 pub struct Settings {
     pub database: DatabaseSettings,
@@ -29,7 +31,7 @@ impl DatabaseSettings {
     }
 }
 
-pub fn get_configuration() -> Result<Settings, config::ConfigError> {
+pub fn get_configuration() -> Result<Settings> {
     let base_path = std::env::current_dir().expect("Failed to determine the current directory");
     let configuration_directory = base_path.join("configuration");
 
@@ -51,8 +53,11 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
                 .prefix_separator("_")
                 .separator("__"),
         )
-        .build()?;
-    settings.try_deserialize::<Settings>()
+        .build()
+        .context("Failed to build configuration source behavior")?;
+    settings
+        .try_deserialize::<Settings>()
+        .context("Failed to deserialize configuration")
 }
 
 pub enum Environment {
