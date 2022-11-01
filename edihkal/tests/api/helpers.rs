@@ -1,7 +1,7 @@
 use axum_test_helper::TestClient;
 use edihkal::{
+    app::router,
     configuration::{get_configuration, DatabaseSettings},
-    router::router,
 };
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
