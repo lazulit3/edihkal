@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use axum::{body::Body, http::StatusCode, routing::get, Extension, Router};
 use sqlx::PgPool;
+use tower_http::trace::TraceLayer;
 
 use crate::{
     configuration::{DatabaseSettings, Settings},
@@ -19,6 +20,7 @@ pub async fn router(db_pool: PgPool) -> Router<Body> {
         .route("/health_check", get(|| async { StatusCode::OK }))
         .route("/drugs", get(get_drugs).post(define_drug))
         .layer(Extension(db_pool))
+        .layer(TraceLayer::new_for_http())
 }
 
 async fn db_pool(db_settings: &DatabaseSettings) -> PgPool {
