@@ -10,7 +10,7 @@ pub async fn get_drugs() -> StatusCode {
 }
 
 /// Define a new drug
-#[tracing::instrument(name = "Defining new drug", skip(db_pool), fields(request_id = %Uuid::new_v4(), drug = drug.name))]
+#[tracing::instrument(name = "Defining new drug", skip(db_pool), fields(drug = drug.name))]
 pub async fn define_drug(
     Extension(db_pool): Extension<Arc<PgPool>>,
     Json(drug): Json<DrugInputs>,
