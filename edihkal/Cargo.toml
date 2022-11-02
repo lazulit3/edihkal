@@ -17,8 +17,9 @@ uuid = { version = "1.1.2", features = ["v4"] }
 
 edihkal-core = { version = "0.1.0", path = "../edihkal-core" }
 tower-http = { version = "0.3.4", default-features = false, features = ["trace"] }
-tracing-subscriber = { version = "0.3.16", default-features = false, features = ["std", "env-filter", "smallvec", "parking_lot", "registry", "fmt"] }
+tracing-subscriber = { version = "0.3.16", default-features = false, features = ["std", "env-filter", "smallvec", "parking_lot", "registry"] }
 tracing = "0.1.37"
+tracing-bunyan-formatter = "0.3.4"
 
 [dev-dependencies]
 axum-test-helper = "0.1.1"
