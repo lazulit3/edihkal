@@ -9,17 +9,21 @@ pub async fn get_drugs() -> StatusCode {
     StatusCode::OK
 }
 
+/// Define a new drug
 #[tracing::instrument(name = "Defining new drug", skip(db_pool), fields(request_id = %Uuid::new_v4(), drug = drug.name))]
 pub async fn define_drug(
     Extension(db_pool): Extension<Arc<PgPool>>,
     Json(drug): Json<DrugInputs>,
 ) -> Result<Json<Drug>, StatusCode> {
-    // Construct Drug with random id from payload.
-    let drug = Drug {
-        id: Uuid::new_v4(),
-        name: drug.name,
-    };
+    match insert_drug(&db_pool, &drug).await {
+        Ok(drug) => Ok(Json(drug)),
+        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+    }
+}
 
+/// Insert drug into database
+#[tracing::instrument(name = "Saving new drug in database", skip_all)]
+pub async fn insert_drug(db_pool: &PgPool, drug: &DrugInputs) -> Result<Drug, sqlx::Error> {
     match sqlx::query_as!(
         Drug,
         r#"
@@ -27,16 +31,16 @@ pub async fn define_drug(
         VALUES ($1, $2)
         RETURNING *
         "#,
-        drug.id,
+        Uuid::new_v4(),
         drug.name
     )
-    .fetch_one(db_pool.as_ref())
+    .fetch_one(db_pool)
     .await
     {
-        Ok(drug) => Ok(Json(drug)),
+        Ok(drug) => Ok(drug),
         Err(e) => {
             tracing::error!("Failed to execute query: {:?}", e);
-            Err(StatusCode::INTERNAL_SERVER_ERROR)
+            Err(e)
         }
     }
 }
