@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use axum::{body::Body, http::StatusCode, routing::get, Extension, Router};
+use secrecy::ExposeSecret;
 use sqlx::PgPool;
 use tower_http::trace::TraceLayer;
 
@@ -24,7 +25,7 @@ pub async fn router(db_pool: PgPool) -> Router<Body> {
 }
 
 async fn db_pool(db_settings: &DatabaseSettings) -> PgPool {
-    PgPool::connect(&db_settings.connection_string())
+    PgPool::connect(db_settings.connection_string().expose_secret())
         .await
         .expect("Failed to connect to database")
 }
