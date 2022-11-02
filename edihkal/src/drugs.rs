@@ -9,6 +9,7 @@ pub async fn get_drugs() -> StatusCode {
     StatusCode::OK
 }
 
+#[tracing::instrument(name = "Defining a new drug", skip(db_pool), fields(request_id = %Uuid::new_v4(), drug = drug.name))]
 pub async fn define_drug(
     Extension(db_pool): Extension<Arc<PgPool>>,
     Json(drug): Json<DrugInputs>,
@@ -34,7 +35,7 @@ pub async fn define_drug(
     {
         Ok(drug) => Ok(Json(drug)),
         Err(e) => {
-            println!("Failed to execute query: {}", e);
+            tracing::error!("Failed to execute query: {:?}", e);
             Err(StatusCode::INTERNAL_SERVER_ERROR)
         }
     }
