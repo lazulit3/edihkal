@@ -16,6 +16,13 @@ tokio = { version = "1.20.1", features = ["macros"] }
 uuid = { version = "1.1.2", features = ["v4"] }
 
 edihkal-core = { version = "0.1.0", path = "../edihkal-core" }
+tower-http = { version = "0.3.4", default-features = false, features = ["request-id", "trace"] }
+tracing-subscriber = { version = "0.3.16", default-features = false, features = ["std", "env-filter", "smallvec", "parking_lot", "registry"] }
+tracing = "0.1.37"
+tracing-bunyan-formatter = "0.3.4"
+tracing-log = { version = "0.1.3", default-features = false, features = ["log-tracer"] }
+secrecy = { version = "0.8.0", features = ["serde"] }
+tower = "0.4.13"
 
 [dev-dependencies]
 axum-test-helper = "0.1.1"

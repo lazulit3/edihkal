@@ -3,6 +3,7 @@ use edihkal::{
     app::router,
     configuration::{get_configuration, DatabaseSettings},
 };
+use secrecy::ExposeSecret;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 
@@ -21,7 +22,7 @@ pub async fn test_client_and_db() -> (TestClient, PgPool) {
     let client_db_pool = configure_database(&configuration.database).await;
     let test_client = TestClient::new(router(client_db_pool).await);
 
-    let db_pool = PgPool::connect(&configuration.database.connection_string())
+    let db_pool = PgPool::connect(configuration.database.connection_string().expose_secret())
         .await
         .expect("Failed to connect to Postgres");
 
@@ -30,16 +31,17 @@ pub async fn test_client_and_db() -> (TestClient, PgPool) {
 
 /// Create database, run migrations, and return connection pool
 pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
-    let mut connection = PgConnection::connect(&config.connection_string_without_db())
-        .await
-        .expect("Failed to connect to Postgres");
+    let mut connection =
+        PgConnection::connect(config.connection_string_without_db().expose_secret())
+            .await
+            .expect("Failed to connect to Postgres");
 
     connection
         .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
         .await
         .expect("Failed to create database");
 
-    let connection_pool = PgPool::connect(&config.connection_string())
+    let connection_pool = PgPool::connect(config.connection_string().expose_secret())
         .await
         .expect("Failed to connect to Postgres");
 
