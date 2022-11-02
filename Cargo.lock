@@ -436,6 +436,7 @@ dependencies = [
  "tower-http",
  "tracing",
  "tracing-bunyan-formatter",
+ "tracing-log",
  "tracing-subscriber",
  "uuid",
 ]
