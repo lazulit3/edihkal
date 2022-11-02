@@ -6,7 +6,7 @@ use edihkal::{app::app, configuration::get_configuration, tracing::configure_tra
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    configure_tracing();
+    configure_tracing("edihkal", "info");
     let configuration = get_configuration().context("Failed to read configuration")?;
     let addr = SocketAddr::from(([127, 0, 0, 1], configuration.application_port));
 
