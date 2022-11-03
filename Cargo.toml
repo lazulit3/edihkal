@@ -1,6 +1,2 @@
 [workspace]
 members = ["edid", "edihkal", "edihkal-client", "edihkal-core"]
-
-[workspace.package]
-edition = "2021"
-repository = "https://0xacab.org/lazulite/edihkal"
