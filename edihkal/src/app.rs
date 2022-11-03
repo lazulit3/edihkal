@@ -37,7 +37,6 @@ pub async fn router(db_pool: PgPool) -> Router<Body> {
 }
 
 async fn db_pool(db_settings: &DatabaseSettings) -> PgPool {
-    PgPool::connect(db_settings.connection_string().expose_secret())
-        .await
+    PgPool::connect_lazy(db_settings.connection_string().expose_secret())
         .expect("Failed to connect to database")
 }
