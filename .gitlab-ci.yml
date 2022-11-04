@@ -4,7 +4,6 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_COMMIT_REF_PROTECTED
-    - if: $CI_COMMIT_TAG
 
 default:
   before_script:
@@ -80,7 +79,6 @@ lint-code:
   # Only run on pushes to protected branches or tags & when a merge request changes files that Clippy is interested in (rust code, Cargo files).
   rules:
     - if: $CI_COMMIT_REF_PROTECTED
-    - if: $CI_COMMIT_TAG
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         paths:
@@ -115,7 +113,6 @@ test-code:
   # Only on pushes to protected branches or tags & when a merge request changes file that warrant tests.
   rules:
     - if: $CI_COMMIT_REF_PROTECTED
-    - if: $CI_COMMIT_TAG
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         paths:
