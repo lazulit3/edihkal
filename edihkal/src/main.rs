@@ -7,11 +7,13 @@ use edihkal::{app::app, configuration::get_configuration, tracing::configure_tra
 #[tokio::main]
 async fn main() -> Result<()> {
     configure_tracing("edihkal", "info");
-    let configuration = get_configuration().context("Failed to read configuration")?;
-    let addr = SocketAddr::from(([127, 0, 0, 1], configuration.application_port));
+    let config = get_configuration().context("Failed to read configuration")?;
+    let addr: SocketAddr = format!("{}:{}", config.application.host, config.application.port)
+        .parse()
+        .context("Failed to parse service host and port into socket address")?;
 
     Server::bind(&addr)
-        .serve(app(&configuration).await.into_make_service())
+        .serve(app(&config).await.into_make_service())
         .await?;
     Ok(())
 }
