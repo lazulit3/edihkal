@@ -4,7 +4,13 @@ use secrecy::{ExposeSecret, Secret};
 #[derive(serde::Deserialize)]
 pub struct Settings {
     pub database: DatabaseSettings,
-    pub application_port: u16,
+    pub application: ApplicationSettings,
+}
+
+#[derive(serde::Deserialize)]
+pub struct ApplicationSettings {
+    pub host: String,
+    pub port: u16,
 }
 
 #[derive(serde::Deserialize)]
@@ -70,12 +76,14 @@ pub fn get_configuration() -> Result<Settings> {
 
 pub enum Environment {
     LocalDev,
+    Production,
 }
 
 impl Environment {
     pub fn as_str(&self) -> &'static str {
         match self {
             Environment::LocalDev => "localdev",
+            Environment::Production => "production",
         }
     }
 }
@@ -86,7 +94,8 @@ impl TryFrom<String> for Environment {
     fn try_from(s: String) -> Result<Self, Self::Error> {
         match s.to_lowercase().as_str() {
             "localdev" => Ok(Self::LocalDev),
-            other => Err(format!("{} is not a supported environment. Currently upported environments are `localdev`.", other)),
+            "production" => Ok(Self::Production),
+            other => Err(format!("{} is not a supported environment. Currently upported environments are `localdev`, `production`.", other)),
         }
     }
 }
