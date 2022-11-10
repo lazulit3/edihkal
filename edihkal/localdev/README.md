@@ -7,9 +7,10 @@
 ### Requirements for Running `init_db.sh`
 
 * Install `pg_isready` to detect when the database service finishes initializing before continuing setup.
-* Install `sqlx-cli` to configure the database (i.e. run migrations) after database is running. To install `sqlx-cli` you may run:
+
+* Install `sea-orm-cli` to configure the database (i.e. run migrations) after database is running. To install `sea-orm-cli` you may run:
 ```sh
-cargo install sqlx-cli --no-default-features -F postgres,rustls
+cargo install sea-orm-cli
 ```
 * Install a container tool such as `podman` or `docker`. You may set `CONTAINER_TOOL` environment variable to select a tool to use, otherwise `init_db.sh` uses `podman` by default.
 

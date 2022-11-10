@@ -8,10 +8,10 @@ if ! [ -x "$(command -v pg_isready)" ]; then
   exit 1
 fi
 
-if ! [ -x "$(command -v sqlx)" ]; then
-  echo >&2 "Error: sqlx is not installed."
+if ! [ -x "$(command -v sea)" ]; then
+  echo >&2 "Error: sea-orm-cli is not installed."
   echo >&2 "Use:"
-  echo >&2 "    cargo install sqlx-cli --no-default-features --features postgres,rustls"
+  echo >&2 "    cargo install sea-orm-cli ..."
   echo >&2 "to install it."
   exit 1
 fi
@@ -51,5 +51,4 @@ until pg_isready -h "${DB_HOST}" -p "${DB_PORT}" -d postgres -U "$DB_USER"; do
 done
 
 export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
-sqlx database create
-sqlx migrate run --source "${localdev_dir}/../migrations"
+sea migrate -d "${localdev_dir}/../migration"
