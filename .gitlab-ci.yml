@@ -100,7 +100,7 @@ lint-code:
     - rustup component add clippy
     - cargo clippy -- -D warnings
   services:
-    - name: timescale/timescaledb:latest-pg14
+    - name: postgres:15-alpine
       alias: database
 
 test-code:
@@ -133,5 +133,5 @@ test-code:
     - SKIP_STARTUP=1 edihkal/localdev/init_db.sh
     - cargo test --workspace
   services:
-    - name: timescale/timescaledb:latest-pg14
+    - name: postgres:15-alpine
       alias: database
