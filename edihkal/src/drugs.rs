@@ -1,33 +1,21 @@
-use std::sync::Arc;
-
 use axum::{http::StatusCode, Extension, Json};
-use edihkal_core::drugs::Drug;
-use sqlx::PgPool;
-use uuid::Uuid;
+use entity::drug;
+use entity::drug::NewDrug;
+use sea_orm::{ActiveModelTrait, DatabaseConnection, IntoActiveModel};
 
-pub async fn get_drugs() -> StatusCode {
+pub async fn get_drugs(Extension(ref db): Extension<DatabaseConnection>) -> StatusCode {
     StatusCode::OK
 }
 
 pub async fn define_drug(
-    Extension(db_pool): Extension<Arc<PgPool>>,
-    Json(drug): Json<Drug>,
-) -> StatusCode {
-    match sqlx::query!(
-        r#"
-        INSERT INTO drugs (id, name)
-        VALUES ($1, $2)
-        "#,
-        Uuid::new_v4(),
-        drug.name
-    )
-    .execute(db_pool.as_ref())
-    .await
-    {
-        Ok(_) => StatusCode::OK,
-        Err(e) => {
-            println!("Failed to execute query: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        }
-    }
+    Extension(ref db): Extension<DatabaseConnection>,
+    Json(drug): Json<NewDrug>,
+) -> Result<Json<drug::Model>, (StatusCode, &'static str)> {
+    let drug = drug.into_active_model().insert(db).await.map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to insert new drug into database",
+        )
+    })?;
+    Ok(Json(drug))
 }

@@ -1,13 +1,15 @@
-use crate::helpers::{test_client, test_client_and_db};
 use axum::http::StatusCode;
-use edihkal_core::drugs::Drug;
-use sqlx::query_as;
+use edihkal_core::drugs::NewDrug;
+use entity::prelude::Drug;
+use sea_orm::EntityTrait;
+
+use crate::helpers::{test_client, test_client_and_db};
 
 #[tokio::test]
 async fn define_drug_returns_200_for_valid_data() {
-    let (client, db_pool) = test_client_and_db().await;
+    let (client, db) = test_client_and_db().await;
 
-    let drug = Drug::new("caffeine");
+    let drug = NewDrug::new("caffeine");
 
     let response = client
         .post("/drugs")
@@ -18,12 +20,10 @@ async fn define_drug_returns_200_for_valid_data() {
 
     assert_eq!(response.status(), StatusCode::OK);
 
-    let saved_drug = query_as!(Drug, "SELECT name FROM drugs",)
-        .fetch_one(&db_pool)
-        .await
-        .expect("Failed to fetch defined drug.");
-
-    assert_eq!(saved_drug.name, "caffeine")
+    match Drug::find().one(&db).await.unwrap() {
+        Some(drug) => assert_eq!(drug.name, "caffeine"),
+        None => panic!("failed to find newly defined drug in database"),
+    }
 }
 
 #[tokio::test]

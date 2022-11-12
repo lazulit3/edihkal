@@ -1,9 +1,7 @@
-use std::sync::Arc;
-
 use axum::{body::Body, http::StatusCode, routing::get, Extension, Router};
-use sqlx::PgPool;
 
 use migration::{Migrator, MigratorTrait};
+use sea_orm::{Database, DatabaseConnection};
 
 use crate::{
     configuration::{DatabaseSettings, Settings},
@@ -11,30 +9,26 @@ use crate::{
 };
 
 pub async fn app(configuration: &Settings) -> Router<Body> {
-    let db_settings = configuration.database;
-    let migrate(&db_settings);
-    let db_pool = db_pool(&db_settings).await;
-    router(db_pool).await
+    let db_settings = &configuration.database;
+    let db = db_connection(db_settings).await;
+    migrate(&db).await;
+    router(db)
 }
 
-pub async fn router(db_pool: PgPool) -> Router<Body> {
-    let db_pool = Arc::new(db_pool);
+pub fn router(db: DatabaseConnection) -> Router<Body> {
     Router::new()
         .route("/health_check", get(|| async { StatusCode::OK }))
         .route("/drugs", get(get_drugs).post(define_drug))
-        .layer(Extension(db_pool))
+        .layer(Extension(db))
 }
 
-async fn db_pool(db_settings: &DatabaseSettings) -> PgPool {
-    PgPool::connect(&db_settings.connection_string())
+pub async fn db_connection(db_settings: &DatabaseSettings) -> DatabaseConnection {
+    Database::connect(&db_settings.connection_string())
         .await
-        .expect("Failed to connect to database")
+        .unwrap()
 }
 
 /// Run database migrations
-async fn migrate(db_settings: &DatabaseSettings) {
-    let connection = sea_orm::Database::connect(&db_settings.connection_string())
-        .await
-        .unwrap();
-    Migrator::up(&connection, None).await.unwrap();
+pub async fn migrate(db_connection: &DatabaseConnection) {
+    Migrator::up(db_connection, None).await.unwrap();
 }

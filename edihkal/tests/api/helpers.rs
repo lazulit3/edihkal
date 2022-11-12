@@ -1,51 +1,55 @@
 use axum_test_helper::TestClient;
 use edihkal::{
     configuration::{get_configuration, DatabaseSettings},
-    router::router,
+    router::{migrate, router},
 };
-use sqlx::{Connection, Executor, PgConnection, PgPool};
+use sea_orm::{ConnectionTrait, Database, DatabaseConnection, Statement};
 use uuid::Uuid;
 
 pub async fn test_client() -> TestClient {
     let mut configuration = get_configuration().expect("Failed to read configuration");
     configuration.database.database_name = Uuid::new_v4().to_string();
 
-    let db_pool = configure_database(&configuration.database).await;
-    TestClient::new(router(db_pool).await)
+    let test_service_db = configure_database(&configuration.database).await;
+    TestClient::new(router(test_service_db))
 }
 
-pub async fn test_client_and_db() -> (TestClient, PgPool) {
+pub async fn test_client_and_db() -> (TestClient, DatabaseConnection) {
     let mut configuration = get_configuration().expect("Failed to read configuration");
     configuration.database.database_name = Uuid::new_v4().to_string();
 
-    let client_db_pool = configure_database(&configuration.database).await;
-    let test_client = TestClient::new(router(client_db_pool).await);
+    let test_service_db = configure_database(&configuration.database).await;
+    let test_client = TestClient::new(router(test_service_db));
 
-    let db_pool = PgPool::connect(&configuration.database.connection_string())
+    let test_db = Database::connect(&configuration.database.connection_string())
         .await
-        .expect("Failed to connect to Postgres");
+        .expect("Failed to connect to database");
 
-    (test_client, db_pool)
+    (test_client, test_db)
 }
 
-/// Create database, run migrations, and return connection pool
-pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
-    let mut connection = PgConnection::connect(&config.connection_string_without_db())
+/// Create a database, run migrations, and return a `DatabaseConnection` for isolated test runs.
+pub async fn configure_database(config: &DatabaseSettings) -> DatabaseConnection {
+    // Connect to database service without selecting a specific database name
+    let db = Database::connect(&config.connection_string_without_db())
         .await
-        .expect("Failed to connect to Postgres");
+        .expect("Failed to connect to database service");
 
-    connection
-        .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
-        .await
-        .expect("Failed to create database");
+    // Create the new database with the configured name
+    db.execute(Statement::from_string(
+        db.get_database_backend(),
+        format!("CREATE DATABASE \"{}\";", config.database_name),
+    ))
+    .await
+    .expect("Failed to create database");
 
-    let connection_pool = PgPool::connect(&config.connection_string())
+    // Create a new database connection selecting the newly created database
+    let db = Database::connect(&config.connection_string())
         .await
-        .expect("Failed to connect to Postgres");
+        .expect("Failed to connect to newly created database");
 
-    sqlx::migrate!("./migrations")
-        .run(&connection_pool)
-        .await
-        .expect("Failed to migrate the database");
-    connection_pool
+    // Run migrations against the newly created database
+    migrate(&db).await;
+
+    db
 }
