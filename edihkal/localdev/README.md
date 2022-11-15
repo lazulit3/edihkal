@@ -8,10 +8,6 @@
 
 * Install `pg_isready` to detect when the database service finishes initializing before continuing setup.
 
-* Install `sea-orm-cli` to configure the database (i.e. run migrations) after database is running. To install `sea-orm-cli` you may run:
-```sh
-cargo install sea-orm-cli
-```
 * Install a container tool such as `podman` or `docker`. You may set `CONTAINER_TOOL` environment variable to select a tool to use, otherwise `init_db.sh` uses `podman` by default.
 
 ### Usage
@@ -26,16 +22,10 @@ Optionally configure the database service using the following environment variab
 
 Configure `CONTAINER_TOOL` if you want to manage the container using a different tool than `podman` by default.
 
-The plain usage will start the database container, wait for the service to be ready, create the database, and setup the database by running sqlx migrations:
+The plain usage will start the database container and wait for the service to be ready.
 
 ```sh
 ./init_db.sh 
-```
-
-To run sqlx migrations after the database is alread running, set `SKIP_STARTUP`:
-
-``` sh
-SKIP_STARTUP=1 ./init_db.sh
 ```
 
 To setup the database using docker instead of podman (default), set `CONTAINER_TOOL`:
