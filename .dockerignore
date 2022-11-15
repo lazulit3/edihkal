@@ -1,0 +1,8 @@
+target
+Dockerfile
+.dockerignore
+.env
+.git
+.gitignore
+.gitlab-ci.yml
+.rustfmt.toml

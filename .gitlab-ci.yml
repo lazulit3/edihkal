@@ -4,14 +4,12 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_COMMIT_REF_PROTECTED
-    - if: $CI_COMMIT_TAG
 
 default:
   before_script:
     - rustc --version
     - cargo --version
     - export PATH="${CARGO_HOME}/bin:${PATH}"
-    - env | grep CI
   cache:
     # Cache build/cargo dependencies based on Cargo.lock changes
     - key:
@@ -78,15 +76,16 @@ lint-code:
     paths:
       - ${CARGO_HOME}/bin/sqlx
       - ${CARGO_HOME}/bin/cargo-sqlx
-  # Only run on protected branches, tags, and when a merge request changes files that Clippy is interested in (rust code, Cargo files).
+  # Only run on pushes to protected branches or tags & when a merge request changes files that Clippy is interested in (rust code, Cargo files).
   rules:
     - if: $CI_COMMIT_REF_PROTECTED
-    - if: $CI_COMMIT_TAG
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         paths:
           - "**/*.rs"
           - "**/Cargo.*"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
   stage: test
   script:
     # Only install sqlx-cli if not already present from cache
@@ -111,10 +110,9 @@ test-code:
     paths:
       - ${CARGO_HOME}/bin/sqlx
       - ${CARGO_HOME}/bin/cargo-sqlx
-  # Only on protected branches, tags, and certain file changes that warrant tests.
+  # Only on pushes to protected branches or tags & when a merge request changes file that warrant tests.
   rules:
     - if: $CI_COMMIT_REF_PROTECTED
-    - if: $CI_COMMIT_TAG
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         paths:
@@ -122,6 +120,8 @@ test-code:
           - "**/*.sql"
           - "**/*.yaml"
           - "**/Cargo.*"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
   stage: test
   script:
     # Only install sqlx-cli if not already present from cache

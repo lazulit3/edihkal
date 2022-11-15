@@ -50,7 +50,7 @@ pub async fn run_command(opts: Opts) -> Result<(), anyhow::Error> {
     match &opts.command {
         Commands::Drugs { command } => match command {
             DrugsCommands::Define { name } => {
-                let config = Config::from(&opts);
+                let config = Config::load(opts.config_path())?;
                 let client = Client::new(&config.edihkal_url);
                 let response = client.create_drug(name).context("Failed to define drug")?;
                 let drug: NewDrug = response.data;

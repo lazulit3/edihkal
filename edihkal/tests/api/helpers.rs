@@ -1,9 +1,10 @@
 use axum_test_helper::TestClient;
 use edihkal::{
+    app::{migrate, router},
     configuration::{get_configuration, DatabaseSettings},
-    router::{migrate, router},
 };
 use sea_orm::{ConnectionTrait, Database, DatabaseConnection, Statement};
+use secrecy::ExposeSecret;
 use uuid::Uuid;
 
 pub async fn test_client() -> TestClient {
@@ -21,7 +22,7 @@ pub async fn test_client_and_db() -> (TestClient, DatabaseConnection) {
     let test_service_db = configure_database(&configuration.database).await;
     let test_client = TestClient::new(router(test_service_db));
 
-    let test_db = Database::connect(&configuration.database.connection_string())
+    let test_db = Database::connect(configuration.database.connection_string().expose_secret())
         .await
         .expect("Failed to connect to database");
 
@@ -31,7 +32,7 @@ pub async fn test_client_and_db() -> (TestClient, DatabaseConnection) {
 /// Create a database, run migrations, and return a `DatabaseConnection` for isolated test runs.
 pub async fn configure_database(config: &DatabaseSettings) -> DatabaseConnection {
     // Connect to database service without selecting a specific database name
-    let db = Database::connect(&config.connection_string_without_db())
+    let db = Database::connect(config.connection_string_without_db().expose_secret())
         .await
         .expect("Failed to connect to database service");
 
@@ -44,7 +45,7 @@ pub async fn configure_database(config: &DatabaseSettings) -> DatabaseConnection
     .expect("Failed to create database");
 
     // Create a new database connection selecting the newly created database
-    let db = Database::connect(&config.connection_string())
+    let db = Database::connect(config.connection_string().expose_secret())
         .await
         .expect("Failed to connect to newly created database");
 

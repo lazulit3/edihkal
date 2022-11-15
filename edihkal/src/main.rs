@@ -1,14 +1,19 @@
+use anyhow::{Context, Result};
 use axum::Server;
-use edihkal::{configuration::get_configuration, router::app};
 use std::net::SocketAddr;
 
+use edihkal::{app::app, configuration::get_configuration, tracing::configure_tracing};
+
 #[tokio::main]
-async fn main() {
-    let configuration = get_configuration().expect("Failed to read configuration");
-    let addr = SocketAddr::from(([127, 0, 0, 1], configuration.application_port));
+async fn main() -> Result<()> {
+    configure_tracing("edihkal", "info");
+    let config = get_configuration().context("Failed to read configuration")?;
+    let addr: SocketAddr = format!("{}:{}", config.application.host, config.application.port)
+        .parse()
+        .context("Failed to parse service host and port into socket address")?;
 
     Server::bind(&addr)
-        .serve(app(&configuration).await.into_make_service())
-        .await
-        .unwrap();
+        .serve(app(&config).await.into_make_service())
+        .await?;
+    Ok(())
 }
