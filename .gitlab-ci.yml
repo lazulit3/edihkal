@@ -28,15 +28,11 @@ variables:
   CARGO_HOME: ${CI_PROJECT_DIR}/.cargo
   EDIHKAL_DATABASE__HOST: database
   EDIHKAL_DATABASE__PASSWORD: $POSTGRES_PASSWORD
-  # POSTGRES envs build DATABASE_URL in edihkal/.env for compile-time sqlx-macros
   POSTGRES_DB: edihkal
   POSTGRES_USER: edihkal
   POSTGRES_PASSWORD: $POSTGRES_PASSWORD
   POSTGRES_HOST: database
   POSTGRES_HOST_AUTH_METHOD: trust
-  # Pin sqlx-cli details
-  SQLX_VERSION: 0.6.2
-  SQLX_FEATURES: postgres,rustls
 
 stages:
   - test
@@ -70,12 +66,6 @@ format-code:
 
 lint-code:
   interruptible: true
-  cache:
-    # Cache sqlx-cli from pinned version/features
-    key: sqlx-${SQLX_VERSION}-${SQLX_FEATURES}
-    paths:
-      - ${CARGO_HOME}/bin/sqlx
-      - ${CARGO_HOME}/bin/cargo-sqlx
   # Only run on pushes to protected branches or tags & when a merge request changes files that Clippy is interested in (rust code, Cargo files).
   rules:
     - if: $CI_COMMIT_REF_PROTECTED
@@ -88,14 +78,9 @@ lint-code:
       when: never
   stage: test
   script:
-    # Only install sqlx-cli if not already present from cache
-    - if ! [ -x "$(command -v sqlx)" ]; then cargo install sqlx-cli --force --locked --version=${SQLX_VERSION} --features=${SQLX_FEATURES} --no-default-features; fi
     - apt update -y
-    # psql required by init_db.sh to wait for DB readiness before running migrations
+    # psql required by init_db.sh to wait for DB readiness before running lints
     - apt install -y postgresql-client
-    # SKIP_STARTUP to only create & migrate DB (no container management needed in CI)
-    - SKIP_STARTUP=1 edihkal/localdev/init_db.sh
-    - cargo sqlx prepare --check --merged
     - rustup component add clippy
     - cargo clippy -- -D warnings
   services:
@@ -104,12 +89,6 @@ lint-code:
 
 test-code:
   interruptible: true
-  cache:
-    # Cache sqlx-cli from pinned version/features
-    key: sqlx-${SQLX_VERSION}-${SQLX_FEATURES}
-    paths:
-      - ${CARGO_HOME}/bin/sqlx
-      - ${CARGO_HOME}/bin/cargo-sqlx
   # Only on pushes to protected branches or tags & when a merge request changes file that warrant tests.
   rules:
     - if: $CI_COMMIT_REF_PROTECTED
@@ -124,13 +103,9 @@ test-code:
       when: never
   stage: test
   script:
-    # Only install sqlx-cli if not already present from cache
-    - if ! [ -x "$(command -v sqlx)" ]; then cargo install sqlx-cli --force --locked --version=${SQLX_VERSION} --features=${SQLX_FEATURES} --no-default-features; fi
     - apt update -y
-    # psql required by init_db.sh to wait for DB readiness before running migrations
+    # psql required by init_db.sh to wait for DB readiness before running tests
     - apt install -y postgresql-client
-    # SKIP_STARTUP to only create & migrate DB (no container management needed in CI)
-    - SKIP_STARTUP=1 edihkal/localdev/init_db.sh
     - cargo test --workspace
   services:
     - name: postgres:15-alpine
