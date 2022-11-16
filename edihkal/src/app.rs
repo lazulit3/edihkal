@@ -1,12 +1,12 @@
-use std::sync::Arc;
-
 use axum::{body::Body, http::StatusCode, routing::get, Extension, Router};
+use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use secrecy::ExposeSecret;
-use sqlx::PgPool;
 use tower::ServiceBuilder;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse};
 use tower_http::ServiceBuilderExt;
 use tower_http::{request_id::MakeRequestUuid, trace::TraceLayer};
+
+use migration::{Migrator, MigratorTrait};
 
 use crate::{
     configuration::{DatabaseSettings, Settings},
@@ -14,16 +14,17 @@ use crate::{
 };
 
 pub async fn app(configuration: &Settings) -> Router<Body> {
-    let db_pool = db_pool(&configuration.database).await;
-    router(db_pool).await
+    let db_settings = &configuration.database;
+    let db = db_connection(db_settings).await;
+    migrate(&db).await;
+    router(db)
 }
 
-pub async fn router(db_pool: PgPool) -> Router<Body> {
-    let db_pool = Arc::new(db_pool);
+pub fn router(db: DatabaseConnection) -> Router<Body> {
     Router::new()
         .route("/health_check", get(|| async { StatusCode::OK }))
         .route("/drugs", get(get_drugs).post(define_drug))
-        .layer(Extension(db_pool))
+        .layer(Extension(db))
         .layer(
             ServiceBuilder::new()
                 .set_x_request_id(MakeRequestUuid)
@@ -36,7 +37,16 @@ pub async fn router(db_pool: PgPool) -> Router<Body> {
         )
 }
 
-async fn db_pool(db_settings: &DatabaseSettings) -> PgPool {
-    PgPool::connect_lazy(db_settings.connection_string().expose_secret())
-        .expect("Failed to connect to database")
+pub async fn db_connection(db_settings: &DatabaseSettings) -> DatabaseConnection {
+    let mut options =
+        ConnectOptions::new(db_settings.connection_string().expose_secret().to_string());
+
+    options.sqlx_logging_level(tracing::log::LevelFilter::Debug);
+
+    Database::connect(options).await.unwrap()
+}
+
+/// Run database migrations
+pub async fn migrate(db_connection: &DatabaseConnection) {
+    Migrator::up(db_connection, None).await.unwrap();
 }

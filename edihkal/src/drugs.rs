@@ -1,46 +1,32 @@
-use std::sync::Arc;
-
 use axum::{http::StatusCode, Extension, Json};
-use edihkal_core::drugs::{Drug, DrugInputs};
-use sqlx::PgPool;
-use uuid::Uuid;
+use sea_orm::{ActiveModelTrait, DatabaseConnection, DbErr, IntoActiveModel};
 
-pub async fn get_drugs() -> StatusCode {
+use entity::drug;
+use entity::drug::NewDrug;
+
+pub async fn get_drugs(Extension(ref _db): Extension<DatabaseConnection>) -> StatusCode {
+    // TODO
     StatusCode::OK
 }
 
-/// Define a new drug
-#[tracing::instrument(name = "Defining new drug", skip(db_pool), fields(drug = drug.name))]
+/// Handles requests to define a `NewDrug`.
+#[tracing::instrument(name = "Defining new drug", skip(db), fields(drug = drug.name))]
 pub async fn define_drug(
-    Extension(db_pool): Extension<Arc<PgPool>>,
-    Json(drug): Json<DrugInputs>,
-) -> Result<Json<Drug>, StatusCode> {
-    match insert_drug(&db_pool, &drug).await {
-        Ok(drug) => Ok(Json(drug)),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-    }
+    Extension(ref db): Extension<DatabaseConnection>,
+    Json(drug): Json<NewDrug>,
+) -> Result<Json<drug::Model>, (StatusCode, &'static str)> {
+    let drug = insert_drug(db, drug).await.map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to insert new drug into database",
+        )
+    })?;
+    Ok(Json(drug))
 }
 
-/// Insert drug into database
-#[tracing::instrument(name = "Saving new drug in database", skip_all)]
-pub async fn insert_drug(db_pool: &PgPool, drug: &DrugInputs) -> Result<Drug, sqlx::Error> {
-    match sqlx::query_as!(
-        Drug,
-        r#"
-        INSERT INTO drugs (id, name)
-        VALUES ($1, $2)
-        RETURNING *
-        "#,
-        Uuid::new_v4(),
-        drug.name
-    )
-    .fetch_one(db_pool)
-    .await
-    {
-        Ok(drug) => Ok(drug),
-        Err(e) => {
-            tracing::error!("Failed to execute query: {:?}", e);
-            Err(e)
-        }
-    }
+/// Inserts a new drug into the database.
+#[tracing::instrument(name = "Inserting drug into database", skip(db), fields(drug = drug.name))]
+pub async fn insert_drug(db: &DatabaseConnection, drug: NewDrug) -> Result<drug::Model, DbErr> {
+    let drug = drug.into_active_model().insert(db).await?;
+    Ok(drug)
 }

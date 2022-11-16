@@ -1,2 +1,6 @@
 [workspace]
-members = ["edid", "edihkal", "edihkal-client", "edihkal-core"]
+members = ["edid", "edihkal", "edihkal-client", "edihkal/entity", "edihkal-core", "edihkal/migration"]
+
+[workspace.package]
+edition = "2021"
+repository = "https://0xacab.org/lazulite/edihkal"

@@ -1,8 +1,9 @@
 [package]
 name = "edihkal-client"
 version = "0.1.0"
-edition = "2021"
 description = "Client for edihkal API."
+edition.repository = true
+edition.workspace = true
 
 [dependencies]
 edihkal-core = { version = "0.1.0", path = "../edihkal-core" }

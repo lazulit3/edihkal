@@ -1,0 +1,13 @@
+[package]
+name = "entity"
+version = "0.1.0"
+publish = false
+edition.workspace = true
+
+[dependencies]
+serde = "1.0.145"
+
+[dependencies.sea-orm]
+default-features = false
+features = ["macros", "with-uuid"]
+version = "0.10.1"
