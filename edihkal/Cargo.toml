@@ -10,7 +10,7 @@ anyhow = "1.0.65"
 axum = { version = "0.5.15", default-features = false, features = ["http1"] }
 config = { version = "0.13.2", default-features = false, features = ["yaml"] }
 edihkal-core = { version = "0.1.0", path = "../edihkal-core" }
-entity = { path = "entity" }
+entity = { path = "../entity" }
 migration = { path = "migration" }
 sea-orm = { version = "0.10.1", default-features = false, features = ["macros", "with-json", "with-uuid", "sqlx-postgres", "runtime-tokio-rustls"] }
 secrecy = { version = "0.8.0", features = ["serde"] }
