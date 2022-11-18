@@ -729,6 +729,7 @@ dependencies = [
  "axum",
  "axum-test-helper",
  "config",
+ "edihkal-client",
  "entity",
  "migration",
  "reqwest",

@@ -3,9 +3,15 @@ use edihkal::{
     app::{migrate, router},
     configuration::{get_configuration, DatabaseSettings},
 };
+use edihkal_client::Client;
 use sea_orm::{ConnectionTrait, Database, DatabaseConnection, Statement};
 use secrecy::ExposeSecret;
 use uuid::Uuid;
+
+pub fn edihkal_client() -> Client {
+    let config = get_configuration().expect("Failed to read configuration");
+    Client::new(config.application.edihkal_url())
+}
 
 pub async fn test_client() -> TestClient {
     let mut configuration = get_configuration().expect("Failed to read configuration");
