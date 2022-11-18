@@ -714,7 +714,6 @@ dependencies = [
  "clap 4.0.10",
  "config",
  "edihkal-client",
- "edihkal-core",
  "rstest",
  "serde",
  "thiserror",
@@ -730,7 +729,6 @@ dependencies = [
  "axum",
  "axum-test-helper",
  "config",
- "edihkal-core",
  "entity",
  "migration",
  "reqwest",
@@ -752,19 +750,11 @@ dependencies = [
 name = "edihkal-client"
 version = "0.1.0"
 dependencies = [
- "edihkal-core",
+ "entity",
  "serde",
  "serde_json",
  "thiserror",
  "ureq",
-]
-
-[[package]]
-name = "edihkal-core"
-version = "0.1.0"
-dependencies = [
- "serde",
- "uuid",
 ]
 
 [[package]]

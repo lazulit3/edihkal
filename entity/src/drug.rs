@@ -47,10 +47,16 @@ pub struct NewDrug {
     pub name: String,
 }
 
+impl NewDrug {
+    pub fn new<S: Into<String>>(name: S) -> NewDrug {
+        NewDrug { name: name.into() }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{ActiveModel, Model, NewDrug};
-    use sea_orm::{ActiveModelBehavior, ActiveModelTrait, IntoActiveModel, Set};
+    use super::{ActiveModel, NewDrug};
+    use sea_orm::{ActiveModelBehavior, IntoActiveModel, Set};
 
     /// `NewDrug.into_active_model()` has expected values.
     ///
@@ -97,43 +103,4 @@ mod tests {
         assert!(active_model.name.is_set());
         assert_eq!(active_model.name.as_ref(), "Cannabis");
     }
-
-    // TODO: This is not a test.
-    /// A `drug::Model` with a `default()` `Uuid` converted into an `ActiveModel` has a nil `Uuid`.
-    ///
-    /// This is a footgun, but `ActiveModelBehavior::before_save()` can catch this.
-    #[test]
-    fn footgun_drug_model_with_default_id_into_active_model_has_nil_id() {
-        let drug_model = Model {
-            id: Default::default(),
-            name: "Dextrometorphan".to_owned(),
-        };
-        let active_model_via_into_trait = drug_model.into_active_model();
-
-        assert!(active_model_via_into_trait.id.as_ref().is_nil());
-
-        let drug_model = Model {
-            id: Default::default(),
-            name: "Dextrometorphan".to_owned(),
-        };
-        let active_model_via_from = ActiveModel::from(drug_model);
-
-        assert!(active_model_via_from.id.as_ref().is_nil());
-    }
-
-    // TODO: This is not a test.
-    /// Using `ActiveModelTrait::default()` for `id` results in a `NotSet` `id`.
-    ///
-    /// This is a footgun, but `ActiveModelBehavior::before_save()` can catch this.
-    #[test]
-    fn footgun_active_model_trait_default_for_id_is_not_set() {
-        let active_model = ActiveModel {
-            name: Set("Ephedrine".to_owned()),
-            ..ActiveModelTrait::default()
-        };
-
-        assert!(active_model.id.is_not_set());
-    }
-
-    // TODO: Test constraints around construction of drug::Model vs NewDrug vs ActiveModel
 }
