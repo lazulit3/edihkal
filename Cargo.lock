@@ -729,7 +729,6 @@ dependencies = [
  "axum",
  "axum-test-helper",
  "config",
- "edihkal-core",
  "entity",
  "migration",
  "reqwest",
@@ -756,14 +755,6 @@ dependencies = [
  "serde_json",
  "thiserror",
  "ureq",
-]
-
-[[package]]
-name = "edihkal-core"
-version = "0.1.0"
-dependencies = [
- "serde",
- "uuid",
 ]
 
 [[package]]

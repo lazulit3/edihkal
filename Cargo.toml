@@ -1,5 +1,5 @@
 [workspace]
-members = ["edid", "edihkal", "edihkal-client", "entity", "edihkal-core", "edihkal/migration"]
+members = ["edid", "edihkal", "edihkal-client", "entity", "edihkal/migration"]
 
 [workspace.package]
 edition = "2021"
