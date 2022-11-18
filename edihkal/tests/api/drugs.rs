@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use edihkal_core::drugs::NewDrug;
-use entity::prelude::Drug;
+use entity::Drug;
 use sea_orm::EntityTrait;
 
 use crate::helpers::{test_client, test_client_and_db};
