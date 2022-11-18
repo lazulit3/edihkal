@@ -13,7 +13,7 @@ impl Endpoint for DrugEndpoint {
     type Output = Drug;
 }
 
-impl Client<'_> {
+impl Client {
     /// Define a drug in edihkal.
     pub fn define_drug(&self, name: &str) -> Result<Response<Drug>, Error> {
         let name = name.to_string();
