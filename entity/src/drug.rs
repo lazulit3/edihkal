@@ -47,6 +47,12 @@ pub struct NewDrug {
     pub name: String,
 }
 
+impl NewDrug {
+    pub fn new<S: Into<String>>(name: S) -> NewDrug {
+        NewDrug { name: name.into() }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{ActiveModel, Model, NewDrug};

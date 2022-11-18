@@ -1,18 +1,21 @@
-use edihkal_core::drugs::NewDrug;
+// Re-export drug Model as Drug for client-side apps.
+pub use entity::drug::Model as Drug;
+use entity::drug::NewDrug;
 
 use crate::{
     edihkal::{Client, Endpoint, Response},
     errors::Error,
 };
+
 struct DrugEndpoint;
 
 impl Endpoint for DrugEndpoint {
-    type Output = NewDrug;
+    type Output = Drug;
 }
 
 impl Client<'_> {
     /// Define a drug in edihkal.
-    pub fn create_drug(&self, name: &str) -> Result<Response<NewDrug>, Error> {
+    pub fn create_drug(&self, name: &str) -> Result<Response<Drug>, Error> {
         let name = name.to_string();
         let path = "/drugs";
         let payload = NewDrug { name };

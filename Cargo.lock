@@ -714,7 +714,6 @@ dependencies = [
  "clap 4.0.10",
  "config",
  "edihkal-client",
- "edihkal-core",
  "rstest",
  "serde",
  "thiserror",
@@ -752,7 +751,7 @@ dependencies = [
 name = "edihkal-client"
 version = "0.1.0"
 dependencies = [
- "edihkal-core",
+ "entity",
  "serde",
  "serde_json",
  "thiserror",
