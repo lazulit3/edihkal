@@ -1,5 +1,5 @@
 // Re-export drug Model as Drug for client-side apps.
-pub use entity::drug::Model as Drug;
+use entity::drug::Model as Drug;
 use entity::drug::NewDrug;
 
 use crate::{
