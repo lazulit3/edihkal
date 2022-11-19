@@ -15,11 +15,9 @@ impl Endpoint for DrugEndpoint {
 
 impl Client {
     /// Define a drug in edihkal.
-    pub fn define_drug(&self, name: &str) -> Result<Response<Drug>, Error> {
-        let name = name.to_string();
+    pub fn define_drug(&self, drug: &NewDrug) -> Result<Response<Drug>, Error> {
         let path = "/drugs";
-        let payload = NewDrug { name };
-        match serde_json::to_value(payload) {
+        match serde_json::to_value(drug) {
             Ok(json) => self.post::<DrugEndpoint>(path, json),
             Err(_) => Err(Error::Deserialization(String::from(
                 "Cannot serialize define_drug payload to JSON",
