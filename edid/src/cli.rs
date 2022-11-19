@@ -53,7 +53,7 @@ pub async fn run_command(opts: Opts) -> Result<(), anyhow::Error> {
                 let client = Client::new(&config.edihkal_url);
                 let response = client.define_drug(name).context("Failed to define drug")?;
                 let drug: Drug = response.data;
-                println!("{} has been defined.", drug.name);
+                println!("{} has been defined.", drug.name());
                 Ok(())
             }
         },

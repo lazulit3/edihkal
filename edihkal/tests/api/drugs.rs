@@ -20,7 +20,7 @@ async fn define_drug_returns_200_for_valid_data() {
     assert_eq!(response.status(), StatusCode::OK);
 
     match Drug::find().one(&db).await.unwrap() {
-        Some(drug) => assert_eq!(drug.name, "caffeine"),
+        Some(drug) => assert_eq!(drug.name(), "caffeine"),
         None => panic!("failed to find newly defined drug in database"),
     }
 }
