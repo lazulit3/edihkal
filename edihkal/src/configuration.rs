@@ -22,6 +22,12 @@ pub struct DatabaseSettings {
     pub database_name: String,
 }
 
+impl ApplicationSettings {
+    pub fn edihkal_url(&self) -> String {
+        format!("http://{}:{}", self.host, self.port)
+    }
+}
+
 impl DatabaseSettings {
     pub fn connection_string(&self) -> Secret<String> {
         Secret::new(format!(

@@ -4,9 +4,9 @@ use serde_json::Value;
 use crate::errors::Error;
 
 /// A client to the edihkal API.
-pub struct Client<'u> {
-    base_url: &'u str,
+pub struct Client {
     agent: ureq::Agent,
+    base_url: String,
 }
 
 /// Defines output types for different endpoints.
@@ -23,12 +23,12 @@ pub struct Response<T> {
     pub status: u16,
 }
 
-impl Client<'_> {
+impl Client {
     /// Constructs a client to an edihkal service at a given base URL.
-    pub fn new(base_url: &str) -> Client {
+    pub fn new<S: Into<String>>(base_url: S) -> Client {
         Client {
-            base_url,
             agent: ureq::Agent::new(),
+            base_url: base_url.into(),
         }
     }
 

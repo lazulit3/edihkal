@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
-use edihkal_client::{Client, Drug};
+use edihkal_client::{Client, Drug, NewDrug};
 
 use crate::config::Config;
 
@@ -51,9 +51,11 @@ pub async fn run_command(opts: Opts) -> Result<(), anyhow::Error> {
             DrugsCommands::Define { name } => {
                 let config = Config::load(opts.config_path())?;
                 let client = Client::new(&config.edihkal_url);
-                let response = client.create_drug(name).context("Failed to define drug")?;
+                let response = client
+                    .define_drug(&NewDrug::new(name))
+                    .context("Failed to define drug")?;
                 let drug: Drug = response.data;
-                println!("{} has been defined.", drug.name);
+                println!("{} has been defined.", drug.name());
                 Ok(())
             }
         },

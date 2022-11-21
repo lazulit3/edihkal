@@ -8,7 +8,19 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     id: Uuid,
-    pub name: String,
+    name: String,
+}
+
+impl Model {
+    /// Returns the `Uuid` ID of the drug.
+    pub fn id(&self) -> &Uuid {
+        &self.id
+    }
+
+    /// Returns the name of the drug.
+    pub fn name(&self) -> &str {
+        &self.name
+    }
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
