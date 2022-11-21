@@ -731,6 +731,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "edihkal_tracing"
+version = "0.1.0"
+dependencies = [
+ "once_cell",
+ "tracing",
+ "tracing-bunyan-formatter",
+ "tracing-log",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "either"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
