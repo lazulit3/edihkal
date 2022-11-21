@@ -2,11 +2,13 @@ use axum::http::StatusCode;
 use entity::{drug::NewDrug, Drug};
 use sea_orm::EntityTrait;
 
-use crate::helpers::{test_client, test_client_and_db};
+use super::helpers::{http, TestService};
 
 #[tokio::test]
 async fn define_drug_returns_200_for_valid_data() {
-    let (client, db) = test_client_and_db().await;
+    let service = TestService::new().await;
+    let client = http::Client::new(service.service_url());
+    let db = service.database_connection();
 
     let drug = NewDrug::new("caffeine");
 
@@ -19,7 +21,7 @@ async fn define_drug_returns_200_for_valid_data() {
 
     assert_eq!(response.status(), StatusCode::OK);
 
-    match Drug::find().one(&db).await.unwrap() {
+    match Drug::find().one(db).await.unwrap() {
         Some(drug) => assert_eq!(drug.name(), "caffeine"),
         None => panic!("failed to find newly defined drug in database"),
     }
@@ -27,7 +29,8 @@ async fn define_drug_returns_200_for_valid_data() {
 
 #[tokio::test]
 async fn define_drug_returns_400_for_missing_data() {
-    let client = test_client().await;
+    let service = TestService::new().await;
+    let client = http::Client::new(service.service_url());
 
     let response = client
         .post("/drugs")
@@ -41,6 +44,5 @@ async fn define_drug_returns_400_for_missing_data() {
 #[ignore]
 #[tokio::test]
 async fn get_drugs_returns_list_of_drugs() {
-    let _client = test_client().await;
     todo!()
 }

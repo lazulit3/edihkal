@@ -1,9 +1,10 @@
-use crate::helpers::test_client;
+use super::helpers::{http, TestService};
 use axum::http::StatusCode;
 
 #[tokio::test]
 async fn health_check_works() {
-    let client = test_client().await;
+    let service = TestService::new().await;
+    let client = http::Client::new(service.service_url());
 
     let response = client.get("/health_check").send().await;
 
