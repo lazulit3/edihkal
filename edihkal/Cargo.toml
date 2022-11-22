@@ -9,6 +9,7 @@ edition.workspace = true
 anyhow = "1.0.65"
 axum = { version = "0.5.15", default-features = false, features = ["http1", "json"] }
 config = { version = "0.13.2", default-features = false, features = ["yaml"] }
+edihkal_tracing = { path = "../edihkal_tracing" }
 entity = { path = "../entity" }
 migration = { path = "migration" }
 sea-orm = { version = "0.10.1", default-features = false, features = ["macros", "with-json", "with-uuid", "sqlx-postgres", "runtime-tokio-rustls"] }
@@ -19,13 +20,12 @@ tokio = { version = "1.20.1", features = ["macros"] }
 tower = "0.4.13"
 tower-http = { version = "0.3.4", default-features = false, features = ["request-id", "trace"] }
 tracing = "0.1.37"
-tracing-bunyan-formatter = "0.3.4"
-tracing-log = { version = "0.1.3", default-features = false, features = ["log-tracer"] }
-tracing-subscriber = { version = "0.3.16", default-features = false, features = ["std", "env-filter", "smallvec", "parking_lot", "registry"] }
 uuid = { version = "1.1.2", features = ["v4"] }
 
 [dev-dependencies]
 bytes = "1"
 edihkal-client = { version = "0.1.0", path = "../edihkal-client" }
+# Enable test-helpers on edihkal_tracing when running tests
+edihkal_tracing = { path = "../edihkal_tracing", features = ["test-helpers"] }
 once_cell = "1"
 reqwest = { version = "0.11.11", default-features = false, features = ["json", "rustls-tls"] }

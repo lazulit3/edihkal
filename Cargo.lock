@@ -701,6 +701,7 @@ dependencies = [
  "bytes",
  "config",
  "edihkal-client",
+ "edihkal_tracing",
  "entity",
  "migration",
  "once_cell",
@@ -713,9 +714,6 @@ dependencies = [
  "tower",
  "tower-http",
  "tracing",
- "tracing-bunyan-formatter",
- "tracing-log",
- "tracing-subscriber",
  "uuid",
 ]
 

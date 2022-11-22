@@ -1,8 +1,9 @@
 use anyhow::{Context, Result};
 use axum::Server;
+use edihkal_tracing::configure_tracing;
 use std::net::SocketAddr;
 
-use edihkal::{app::app, configuration::get_configuration, tracing::configure_tracing};
+use edihkal::{app::app, configuration::get_configuration};
 
 #[tokio::main]
 async fn main() -> Result<()> {
