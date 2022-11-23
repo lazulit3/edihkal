@@ -75,3 +75,65 @@ impl Client {
         url
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use edihkal_tracing::test_helpers::lazy_tracing;
+
+    use entity::{drug, drug::NewDrug};
+    use wiremock::{
+        matchers::{body_json, method, path},
+        Mock, MockServer, ResponseTemplate,
+    };
+
+    use super::{Client, Endpoint};
+
+    struct TestEndpoint;
+    impl Endpoint for TestEndpoint {
+        type Output = crate::Drug;
+    }
+
+    #[tokio::test]
+    async fn post_json() {
+        // Arrange
+        lazy_tracing();
+
+        let mock_server = MockServer::start().await;
+        let mock_uri = mock_server.uri();
+        let client = Client::new(mock_uri);
+
+        let request_body = serde_json::to_value(NewDrug::new("iboga")).unwrap();
+        let response_body = drug::Model::new("iboga");
+
+        Mock::given(method("POST"))
+            .and(path("/drugs"))
+            .and(body_json(&request_body))
+            .respond_with(ResponseTemplate::new(200).set_body_json(response_body))
+            .expect(1)
+            .mount(&mock_server)
+            .await;
+
+        // Act
+        client
+            .post::<TestEndpoint>("/drugs", request_body)
+            .expect("POST request failed");
+
+        // Assert
+    }
+
+    #[test]
+    fn url_path_appended_to_client_base_url() {
+        // Arrange
+        lazy_tracing();
+        let base_url = "http://127.0.0.1:8080";
+        let client = Client::new(base_url);
+        let relative_url_path = "/foo/bar";
+
+        // Act
+        let url = client.url(relative_url_path);
+
+        // Assert
+        assert_eq!(url, "http://127.0.0.1:8080/foo/bar");
+    }
+}
