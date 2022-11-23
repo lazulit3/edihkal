@@ -12,6 +12,14 @@ pub struct Model {
 }
 
 impl Model {
+    /// Construct a new `drug::Model` with a random id.
+    pub fn new<S: Into<String>>(name: S) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            name: name.into(),
+        }
+    }
+
     /// Returns the `Uuid` ID of the drug.
     pub fn id(&self) -> &Uuid {
         &self.id
