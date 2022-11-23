@@ -7,8 +7,6 @@ pub static TRACING: Lazy<()> = Lazy::new(|| {
     // Use TEST_LOG to determine whether test logs should output.
     if std::env::var("TEST_LOG").is_ok() {
         configure_tracing("test", "info", std::io::stdout);
-    } else {
-        configure_tracing("test", "info", std::io::sink);
     }
 });
 
