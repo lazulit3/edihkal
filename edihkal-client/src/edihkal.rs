@@ -1,5 +1,4 @@
-use serde::de::DeserializeOwned;
-use serde_json::Value;
+use serde::{de::DeserializeOwned, Serialize};
 
 use crate::errors::Error;
 
@@ -11,6 +10,7 @@ pub struct Client {
 
 /// Defines output types for different endpoints.
 pub trait Endpoint {
+    type Input: Serialize;
     type Output: DeserializeOwned;
 }
 
@@ -35,8 +35,12 @@ impl Client {
     // TODO: Implement other HTTP methods.
 
     /// Sends a POST request to the edihkal API service.
-    #[tracing::instrument(level = "debug", skip(self))]
-    pub fn post<E: Endpoint>(&self, path: &str, data: Value) -> Result<Response<E::Output>, Error> {
+    #[tracing::instrument(level = "debug", skip(self, data))]
+    pub fn post<E: Endpoint>(
+        &self,
+        path: &str,
+        data: E::Input,
+    ) -> Result<Response<E::Output>, Error> {
         let response = self
             .agent
             .post(&self.url(path))
@@ -94,7 +98,8 @@ mod tests {
 
     struct TestEndpoint;
     impl Endpoint for TestEndpoint {
-        type Output = crate::Drug;
+        type Input = NewDrug;
+        type Output = drug::Model;
     }
 
     #[tokio::test]
@@ -106,7 +111,7 @@ mod tests {
         let mock_uri = mock_server.uri();
         let client = Client::new(mock_uri);
 
-        let request_body = serde_json::to_value(NewDrug::new("iboga")).unwrap();
+        let request_body = NewDrug::new("iboga");
         let response_body = drug::Model::new("iboga");
 
         Mock::given(method("POST"))

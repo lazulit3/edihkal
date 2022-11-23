@@ -10,20 +10,16 @@ use crate::{
 struct DrugEndpoint;
 
 impl Endpoint for DrugEndpoint {
+    type Input = NewDrug;
     type Output = Drug;
 }
 
 impl Client {
     /// Define a drug in edihkal.
     #[tracing::instrument(level = "debug", skip(self))]
-    pub fn define_drug(&self, drug: &NewDrug) -> Result<Response<Drug>, Error> {
+    pub fn define_drug(&self, drug: NewDrug) -> Result<Response<Drug>, Error> {
         let path = "/drugs";
-        match serde_json::to_value(drug) {
-            Ok(json) => self.post::<DrugEndpoint>(path, json),
-            Err(_) => Err(Error::Deserialization(String::from(
-                "Cannot serialize define_drug payload to JSON",
-            ))),
-        }
+        self.post::<DrugEndpoint>(path, drug)
     }
 }
 
@@ -59,7 +55,7 @@ mod tests {
             .await;
 
         // Act
-        client.define_drug(&new_drug).expect("Failed to define new drug");
+        client.define_drug(new_drug).expect("Failed to define new drug");
 
         // Assert
     }
