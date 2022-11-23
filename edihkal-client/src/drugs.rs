@@ -15,6 +15,7 @@ impl Endpoint for DrugEndpoint {
 
 impl Client {
     /// Define a drug in edihkal.
+    #[tracing::instrument(level = "debug", skip(self))]
     pub fn define_drug(&self, drug: &NewDrug) -> Result<Response<Drug>, Error> {
         let path = "/drugs";
         match serde_json::to_value(drug) {

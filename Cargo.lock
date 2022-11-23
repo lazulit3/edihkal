@@ -727,6 +727,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tokio",
+ "tracing",
  "ureq",
  "wiremock",
 ]

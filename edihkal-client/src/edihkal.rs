@@ -35,6 +35,7 @@ impl Client {
     // TODO: Implement other HTTP methods.
 
     /// Sends a POST request to the edihkal API service.
+    #[tracing::instrument(level = "debug", skip(self))]
     pub fn post<E: Endpoint>(&self, path: &str, data: Value) -> Result<Response<E::Output>, Error> {
         let response = self
             .agent
@@ -45,6 +46,7 @@ impl Client {
     }
 
     /// Process `ureq` result from API call into edihkal API result.
+    #[tracing::instrument(level = "debug")]
     fn process_response<E: Endpoint>(
         result: Result<ureq::Response, ureq::Error>,
     ) -> Result<Response<E::Output>, Error> {
@@ -58,6 +60,7 @@ impl Client {
     }
 
     /// Returns a `Response` parsed from `ureq::Response`.
+    #[tracing::instrument(level = "debug")]
     fn parse_response<E: Endpoint>(response: ureq::Response) -> Result<Response<E::Output>, Error> {
         let status = response.status();
 
