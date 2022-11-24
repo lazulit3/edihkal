@@ -29,7 +29,7 @@ pub async fn unique_database() -> DatabaseConnection {
         .expect("Failed to connect to newly created database");
 
     // Run migrations against the newly created database
-    migrate(&db).await;
+    migrate(&db).await.unwrap();
 
     db
 }

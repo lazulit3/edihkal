@@ -1,12 +1,20 @@
 use axum::{http::StatusCode, Extension, Json};
-use sea_orm::{ActiveModelTrait, DatabaseConnection, DbErr, IntoActiveModel};
+use sea_orm::{ActiveModelTrait, DatabaseConnection, DbErr, EntityTrait, IntoActiveModel};
 
 use entity::drug;
-use entity::drug::NewDrug;
+use entity::{drug::NewDrug, Drug};
 
-pub async fn get_drugs(Extension(ref _db): Extension<DatabaseConnection>) -> StatusCode {
-    // TODO
-    StatusCode::OK
+#[tracing::instrument(name = "Getting drugs", skip(db))]
+pub async fn get_drugs(
+    Extension(ref db): Extension<DatabaseConnection>,
+) -> Result<Json<Vec<drug::Model>>, (StatusCode, &'static str)> {
+    let drugs = Drug::find().all(db).await.map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to get defined drugs",
+        )
+    })?;
+    Ok(Json(drugs))
 }
 
 /// Handles requests to define a `NewDrug`.
