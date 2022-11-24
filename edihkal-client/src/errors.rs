@@ -1,53 +1,24 @@
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Deserialize, thiserror::Error, Serialize)]
+#[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Bad Request")]
-    BadRequest,
-    #[error("Unauthorized")]
-    Unauthorized,
-    #[error("Not Found")]
-    NotFound,
-    #[error("The edihkal service encountered an unexpected error")]
-    InternalServerError,
-    #[error("Bad Gateway")]
-    BadGateway,
-    #[error("Service Unavailable")]
-    ServiceUnavailable,
-    #[error("Gateway Timeout")]
-    GatewayTimeout,
+    /// HTTP request received error status code
+    #[error("HTTP Error - {0}")]
+    Http(#[source] reqwest::Error),
 
-    /// Error for status codes not captured by other `Error` variants (see [`parse_status_error()`])
-    #[error("Error Status - {0} {1}")]
-    Status(String, String),
+    // TODO: Probs not enough info to troubleshoot effectively?
+    #[error("Error while parsing JSON: {0}")]
+    InvalidJson(#[from] serde_json::Error),
 
-    #[error("Transport Error - {0}({1})")]
-    Transport(String, String),
-
-    #[error("Deserialization Error: {0}")]
-    Deserialization(String),
+    /// An error encountered communicating with API service
+    #[error("Network Error - {0}")]
+    Network(#[source] reqwest::Error),
 }
 
-impl Error {
-    /// Returns `Error` parsed from status code & response
-    pub fn parse_status_error(code: u16, response: ureq::Response) -> Error {
-        match code {
-            400 => Self::BadRequest,
-            401 => Self::Unauthorized,
-            404 => Self::NotFound,
-            500 => Self::InternalServerError,
-            502 => Self::BadGateway,
-            503 => Self::ServiceUnavailable,
-            504 => Self::GatewayTimeout,
-            _ => Self::Status(
-                response.status().to_string(),
-                response.status_text().to_string(),
-            ),
+/// Map [`reqwest::Error`] origin to `Error` variants.
+impl From<reqwest::Error> for Error {
+    fn from(error: reqwest::Error) -> Self {
+        if error.is_status() {
+            return Error::Http(error);
         }
-    }
-
-    /// Returns `Error::Transport` parsed from [`ureq::Transport`]
-    pub fn parse_transport_error(transport: ureq::Transport) -> Error {
-        Self::Transport(transport.to_string(), transport.kind().to_string())
+        Error::Network(error)
     }
 }

@@ -14,7 +14,7 @@ async fn main() -> Result<()> {
         .context("Failed to parse service host and port into socket address")?;
 
     Server::bind(&addr)
-        .serve(app(&config).await.into_make_service())
+        .serve(app(&config).await?.into_make_service())
         .await?;
     Ok(())
 }

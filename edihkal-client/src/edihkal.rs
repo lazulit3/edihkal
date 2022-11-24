@@ -4,7 +4,7 @@ use crate::errors::Error;
 
 /// A client to the edihkal API.
 pub struct Client {
-    agent: ureq::Agent,
+    client: reqwest::Client,
     base_url: String,
 }
 
@@ -14,20 +14,11 @@ pub trait Endpoint {
     type Output: DeserializeOwned;
 }
 
-/// Response from an edihkal API call.
-#[derive(Debug)]
-pub struct Response<T> {
-    /// Object(s) returned by the API (type `T` is determined by the API endpoint).
-    pub data: T,
-    /// HTTP status code.
-    pub status: u16,
-}
-
 impl Client {
     /// Constructs a client to an edihkal service at a given base URL.
     pub fn new<S: Into<String>>(base_url: S) -> Client {
         Client {
-            agent: ureq::Agent::new(),
+            client: reqwest::Client::new(),
             base_url: base_url.into(),
         }
     }
@@ -36,43 +27,25 @@ impl Client {
 
     /// Sends a POST request to the edihkal API service.
     #[tracing::instrument(level = "debug", skip(self, data))]
-    pub fn post<E: Endpoint>(
-        &self,
-        path: &str,
-        data: E::Input,
-    ) -> Result<Response<E::Output>, Error> {
+    pub async fn post<E: Endpoint>(&self, path: &str, data: E::Input) -> Result<E::Output, Error> {
         let response = self
-            .agent
+            .client
             .post(&self.url(path))
-            .set("Accept", "appliation/json")
-            .send_json(data);
-        Self::process_response::<E>(response)
+            .header("Accept", "appliation/json")
+            .header("Content-Type", "application/json")
+            .json(&data)
+            .send()
+            .await;
+        Self::process_response::<E>(response).await
     }
 
-    /// Process `ureq` result from API call into edihkal API result.
+    /// Deserializes response's JSON data or propagate errors as [`edihkal_client::Error`].
     #[tracing::instrument(level = "debug")]
-    fn process_response<E: Endpoint>(
-        result: Result<ureq::Response, ureq::Error>,
-    ) -> Result<Response<E::Output>, Error> {
-        match result {
-            Ok(response) => Self::parse_response::<E>(response),
-            Err(ureq::Error::Status(code, response)) => {
-                Err(Error::parse_status_error(code, response))
-            }
-            Err(ureq::Error::Transport(transport)) => Err(Error::parse_transport_error(transport)),
-        }
-    }
-
-    /// Returns a `Response` parsed from `ureq::Response`.
-    #[tracing::instrument(level = "debug")]
-    fn parse_response<E: Endpoint>(response: ureq::Response) -> Result<Response<E::Output>, Error> {
-        let status = response.status();
-
-        let data: E::Output = response
-            .into_json()
-            .map_err(|e| Error::Deserialization(e.to_string()))?;
-
-        Ok(Response { data, status })
+    async fn process_response<E: Endpoint>(
+        result: Result<reqwest::Response, reqwest::Error>,
+    ) -> Result<E::Output, Error> {
+        // TODO: Handle connect error separately from HttpError (e.g. is_status vs is_connect)
+        Ok(result?.json().await?)
     }
 
     /// Returns URL with `path` appended to the `Client`'s base URL.
@@ -125,6 +98,7 @@ mod tests {
         // Act
         client
             .post::<TestEndpoint>("/drugs", request_body)
+            .await
             .expect("POST request failed");
 
         // Assert
