@@ -44,8 +44,14 @@ impl Client {
     async fn process_response<E: Endpoint>(
         result: Result<reqwest::Response, reqwest::Error>,
     ) -> Result<E::Output, Error> {
-        // TODO: Handle connect error separately from HttpError (e.g. is_status vs is_connect)
-        Ok(result?.json().await?)
+        // First consume response data as a string so it can be included in the Error if JSON
+        // deserialization fails.
+        let data: String = result?.text().await?;
+        let data: E::Output = serde_json::from_str(&data).map_err(|source| Error::InvalidJson {
+            source,
+            raw: data.into(),
+        })?;
+        Ok(data)
     }
 
     /// Returns URL with `path` appended to the `Client`'s base URL.
@@ -91,7 +97,7 @@ mod tests {
             .and(path("/drugs"))
             .and(body_json(&request_body))
             .respond_with(ResponseTemplate::new(200).set_body_json(response_body))
-            .expect(1)
+            .expect(1) // Assert
             .mount(&mock_server)
             .await;
 
@@ -100,8 +106,6 @@ mod tests {
             .post::<TestEndpoint>("/drugs", request_body)
             .await
             .expect("POST request failed");
-
-        // Assert
     }
 
     #[test]
