@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use axum::{body::Body, http::StatusCode, routing::get, Extension, Router};
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use secrecy::ExposeSecret;
@@ -13,11 +14,11 @@ use crate::{
     drugs::{define_drug, get_drugs},
 };
 
-pub async fn app(configuration: &Settings) -> Router<Body> {
+pub async fn app(configuration: &Settings) -> Result<Router<Body>> {
     let db_settings = &configuration.database;
-    let db = db_connection(db_settings).await;
-    migrate(&db).await;
-    router(db)
+    let db = db_connection(db_settings).await?;
+    migrate(&db).await?;
+    Ok(router(db))
 }
 
 pub fn router(db: DatabaseConnection) -> Router<Body> {
@@ -37,16 +38,20 @@ pub fn router(db: DatabaseConnection) -> Router<Body> {
         )
 }
 
-pub async fn db_connection(db_settings: &DatabaseSettings) -> DatabaseConnection {
+pub async fn db_connection(db_settings: &DatabaseSettings) -> Result<DatabaseConnection> {
     let mut options =
         ConnectOptions::new(db_settings.connection_string().expose_secret().to_string());
 
     options.sqlx_logging_level(tracing::log::LevelFilter::Debug);
 
-    Database::connect(options).await.unwrap()
+    Database::connect(options)
+        .await
+        .context("Failed to connect to database")
 }
 
 /// Run database migrations
-pub async fn migrate(db_connection: &DatabaseConnection) {
-    Migrator::up(db_connection, None).await.unwrap();
+pub async fn migrate(db_connection: &DatabaseConnection) -> Result<()> {
+    Migrator::up(db_connection, None)
+        .await
+        .context("Failed to run database migrations")
 }
