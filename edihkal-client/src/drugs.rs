@@ -3,7 +3,7 @@ use entity::drug::Model as Drug;
 use entity::drug::NewDrug;
 
 use crate::{
-    edihkal::{Client, Endpoint, Response},
+    edihkal::{Client, Endpoint},
     errors::Error,
 };
 
@@ -17,9 +17,9 @@ impl Endpoint for DrugEndpoint {
 impl Client {
     /// Define a drug in edihkal.
     #[tracing::instrument(level = "debug", skip(self))]
-    pub fn define_drug(&self, drug: NewDrug) -> Result<Response<Drug>, Error> {
+    pub async fn define_drug(&self, drug: NewDrug) -> Result<Drug, Error> {
         let path = "/drugs";
-        self.post::<DrugEndpoint>(path, drug)
+        self.post::<DrugEndpoint>(path, drug).await
     }
 }
 
@@ -55,7 +55,7 @@ mod tests {
             .await;
 
         // Act
-        client.define_drug(new_drug).expect("Failed to define new drug");
+        client.define_drug(new_drug).await.expect("Failed to define new drug");
 
         // Assert
     }
