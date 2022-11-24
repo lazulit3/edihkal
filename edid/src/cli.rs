@@ -22,7 +22,8 @@ pub struct Opts {
 #[derive(Subcommand)]
 enum Commands {
     /// Manage drugs known by edihkal
-    Drugs {
+    #[command(alias("drugs"))]
+    Drug {
         #[command(subcommand)]
         command: DrugsCommands,
     },
@@ -47,7 +48,7 @@ impl Opts {
 /// Run appropriate command based on parsed Opts.
 pub async fn run_command(opts: Opts) -> Result<(), anyhow::Error> {
     match &opts.command {
-        Commands::Drugs { command } => match command {
+        Commands::Drug { command } => match command {
             DrugsCommands::Define { name } => {
                 let config = Config::load(opts.config_path())?;
                 let client = Client::new(&config.edihkal_url);
