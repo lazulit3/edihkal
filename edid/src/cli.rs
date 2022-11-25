@@ -13,11 +13,17 @@ pub struct Opts {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Manage drugs known by edihkal
+    /// Drugs defined in edihkal
     #[command(alias("drugs"))]
     Drug {
         #[command(subcommand)]
         cmd: cmd::Drug,
+    },
+    /// Drug journal entries recording when quantities of drugs are used
+    #[command(alias("entries"))]
+    Entry {
+        #[command(subcommand)]
+        command: cmd::Entry,
     },
 }
 
@@ -25,5 +31,6 @@ enum Commands {
 pub async fn run_command(opts: Opts) -> Result<(), anyhow::Error> {
     match &opts.cmd {
         Commands::Drug { cmd } => cmd::drug::execute(cmd).await,
+        Commands::Entry { command } => cmd::entry::execute(command).await,
     }
 }
