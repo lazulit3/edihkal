@@ -22,7 +22,8 @@ pub struct Opts {
 #[derive(Subcommand)]
 enum Commands {
     /// Manage drugs known by edihkal
-    Drugs {
+    #[command(alias("drugs"))]
+    Drug {
         #[command(subcommand)]
         command: DrugsCommands,
     },
@@ -35,6 +36,8 @@ enum DrugsCommands {
         /// Name of the drug
         name: String,
     },
+    /// Get drugs defined in edihkal
+    List,
 }
 
 impl Opts {
@@ -46,16 +49,23 @@ impl Opts {
 
 /// Run appropriate command based on parsed Opts.
 pub async fn run_command(opts: Opts) -> Result<(), anyhow::Error> {
+    let config = Config::load(opts.config_path())?;
+    let client = Client::new(&config.edihkal_url);
     match &opts.command {
-        Commands::Drugs { command } => match command {
+        Commands::Drug { command } => match command {
             DrugsCommands::Define { name } => {
-                let config = Config::load(opts.config_path())?;
-                let client = Client::new(&config.edihkal_url);
                 let drug = client
                     .define_drug(NewDrug::new(name))
                     .await
                     .context("Failed to define drug")?;
                 println!("{} has been defined.", drug.name());
+                Ok(())
+            }
+            DrugsCommands::List => {
+                let drugs = client.get_drugs().await.context("Failed to get defined drugs")?;
+                for drug in &drugs {
+                    println!("{}", drug.name());
+                }
                 Ok(())
             }
         },

@@ -10,8 +10,8 @@ pub struct Client {
 
 /// Defines output types for different endpoints.
 pub trait Endpoint {
-    type Input: Serialize;
-    type Output: DeserializeOwned;
+    type NewModel: Serialize;
+    type Model: DeserializeOwned;
 }
 
 impl Client {
@@ -25,9 +25,25 @@ impl Client {
 
     // TODO: Implement other HTTP methods.
 
+    /// Sends a GET request to the edihkal API service.
+    #[tracing::instrument(level = "debug", skip(self))]
+    pub async fn get<E: Endpoint>(&self, path: &str) -> Result<Vec<E::Model>, Error> {
+        let response = self
+            .client
+            .get(&self.url(path))
+            .header("Accept", "appliation/json")
+            .send()
+            .await;
+        Self::process_response::<Vec<E::Model>>(response).await
+    }
+
     /// Sends a POST request to the edihkal API service.
     #[tracing::instrument(level = "debug", skip(self, data))]
-    pub async fn post<E: Endpoint>(&self, path: &str, data: E::Input) -> Result<E::Output, Error> {
+    pub async fn post<E: Endpoint>(
+        &self,
+        path: &str,
+        data: E::NewModel,
+    ) -> Result<E::Model, Error> {
         let response = self
             .client
             .post(&self.url(path))
@@ -36,16 +52,22 @@ impl Client {
             .json(&data)
             .send()
             .await;
-        Self::process_response::<E>(response).await
+        Self::process_response::<E::Model>(response).await
     }
 
     /// Deserializes response's JSON data or propagate errors as [`edihkal_client::Error`].
     #[tracing::instrument(level = "debug")]
-    async fn process_response<E: Endpoint>(
+    async fn process_response<O: DeserializeOwned>(
         result: Result<reqwest::Response, reqwest::Error>,
-    ) -> Result<E::Output, Error> {
-        // TODO: Handle connect error separately from HttpError (e.g. is_status vs is_connect)
-        Ok(result?.json().await?)
+    ) -> Result<O, Error> {
+        // First consume response data as a string so it can be included in the Error if JSON
+        // deserialization fails.
+        let data: String = result?.text().await?;
+        let data: O = serde_json::from_str(&data).map_err(|source| Error::InvalidJson {
+            source,
+            raw: data.into(),
+        })?;
+        Ok(data)
     }
 
     /// Returns URL with `path` appended to the `Client`'s base URL.
@@ -67,12 +89,36 @@ mod tests {
         Mock, MockServer, ResponseTemplate,
     };
 
-    use super::{Client, Endpoint};
+    use crate::drugs::DrugEndpoint;
 
-    struct TestEndpoint;
-    impl Endpoint for TestEndpoint {
-        type Input = NewDrug;
-        type Output = drug::Model;
+    use super::Client;
+
+    #[tokio::test]
+    async fn get_json() {
+        // Arrange
+        lazy_tracing();
+
+        let mock_server = MockServer::start().await;
+        let mock_uri = mock_server.uri();
+        let client = Client::new(mock_uri);
+
+        let response_body = vec![
+            drug::Model::new("lysergic acid diethylamide"),
+            drug::Model::new("3,4-methylenedioxy-methamphetamine"),
+        ];
+
+        Mock::given(method("GET"))
+            .and(path("/drugs"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(response_body))
+            .expect(1) // Assert
+            .mount(&mock_server)
+            .await;
+
+        // Act
+        client
+            .get::<DrugEndpoint>("/drugs")
+            .await
+            .expect("GET request failed");
     }
 
     #[tokio::test]
@@ -91,17 +137,15 @@ mod tests {
             .and(path("/drugs"))
             .and(body_json(&request_body))
             .respond_with(ResponseTemplate::new(200).set_body_json(response_body))
-            .expect(1)
+            .expect(1) // Assert
             .mount(&mock_server)
             .await;
 
         // Act
         client
-            .post::<TestEndpoint>("/drugs", request_body)
+            .post::<DrugEndpoint>("/drugs", request_body)
             .await
             .expect("POST request failed");
-
-        // Assert
     }
 
     #[test]

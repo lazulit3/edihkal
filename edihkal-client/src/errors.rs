@@ -4,9 +4,19 @@ pub enum Error {
     #[error("HTTP Error - {0}")]
     Http(#[source] reqwest::Error),
 
-    // TODO: Probs not enough info to troubleshoot effectively?
-    #[error("Error while parsing JSON: {0}")]
-    InvalidJson(#[from] serde_json::Error),
+    /// An Error encountered parsing respons from edihkal service.
+    ///
+    /// If get this error, please [open an issue] with the error output attached.
+    /// (Consider changing sensitive data in the output e.g. drug names.)
+    ///
+    /// [open an issue]: https://0xacab.org/lazulite/edihkal/-/issues/new
+    #[error("Error parsing JSON: {source} (raw: {raw:?})")]
+    InvalidJson {
+        #[source]
+        source: serde_json::Error,
+        /// Raw JSON string that couldn't be parsed
+        raw: Box<str>,
+    },
 
     /// An error encountered communicating with API service
     #[error("Network Error - {0}")]

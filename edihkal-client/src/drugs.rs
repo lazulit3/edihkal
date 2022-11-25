@@ -7,19 +7,24 @@ use crate::{
     errors::Error,
 };
 
-struct DrugEndpoint;
+pub(crate) struct DrugEndpoint;
 
 impl Endpoint for DrugEndpoint {
-    type Input = NewDrug;
-    type Output = Drug;
+    type NewModel = NewDrug;
+    type Model = Drug;
 }
 
 impl Client {
     /// Define a drug in edihkal.
     #[tracing::instrument(level = "debug", skip(self))]
     pub async fn define_drug(&self, drug: NewDrug) -> Result<Drug, Error> {
-        let path = "/drugs";
-        self.post::<DrugEndpoint>(path, drug).await
+        self.post::<DrugEndpoint>("/drugs", drug).await
+    }
+
+    /// Get defind drugs from edihkal.
+    #[tracing::instrument(level = "debug", skip(self))]
+    pub async fn get_drugs(&self) -> Result<Vec<Drug>, Error> {
+        self.get::<DrugEndpoint>("/drugs").await
     }
 }
 

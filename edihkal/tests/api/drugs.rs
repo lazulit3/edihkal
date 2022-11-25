@@ -1,5 +1,5 @@
 use axum::http::StatusCode;
-use entity::{drug::NewDrug, Drug};
+use entity::{drug, drug::NewDrug, Drug};
 use sea_orm::EntityTrait;
 
 use super::helpers::{http, TestService};
@@ -41,8 +41,40 @@ async fn define_drug_returns_400_for_missing_data() {
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
 }
 
-#[ignore]
 #[tokio::test]
 async fn get_drugs_returns_list_of_drugs() {
-    todo!()
+    // Arrange
+    let service = TestService::new().await;
+    let edihkal_client = edihkal_client::Client::new(service.service_url().to_string());
+    let http_client = http::Client::new(service.service_url());
+
+    // Define drugs with these names
+    let defined_drugs = vec!["gamma-hydroxybutyrate", "hydrocodone"];
+    for drug_name in &defined_drugs {
+        let drug = NewDrug::new(*drug_name);
+        edihkal_client.define_drug(drug).await.unwrap();
+    }
+
+    // Act
+    // Request list of defined drugs from API
+    let response = http_client
+        .get("/drugs")
+        .header("Content-Type", "application/json")
+        .send()
+        .await;
+
+    // Assert
+    assert_eq!(response.status(), StatusCode::OK);
+
+    // Response JSON should deserialize into list of drug models.
+    let drugs: Vec<drug::Model> = response.json().await;
+
+    // edihkal should return the same quantity of drugs as what we defined.
+    assert_eq!(defined_drugs.len(), drugs.len());
+
+    // Each drug should have a name from `drug_names` and a non-nil `Uuid`
+    for drug in drugs {
+        assert!(defined_drugs.contains(&drug.name()));
+        assert!(!drug.id().is_nil());
+    }
 }
