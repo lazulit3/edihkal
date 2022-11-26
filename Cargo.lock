@@ -2006,6 +2006,7 @@ version = "0.28.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d2fbe015dbdaa7d8829d71c1e14fb6289e928ac256b93dfda543c85cd89d6f03"
 dependencies = [
+ "chrono",
  "sea-query-derive",
  "serde_json",
  "uuid",
@@ -2017,6 +2018,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "03548c63aec07afd4fd190923e0160d2f2fc92def27470b54154cf232da6203b"
 dependencies = [
+ "chrono",
  "sea-query",
  "serde_json",
  "sqlx",
@@ -2255,6 +2257,7 @@ dependencies = [
  "bitflags",
  "byteorder",
  "bytes",
+ "chrono",
  "crossbeam-queue",
  "dirs",
  "dotenvy",

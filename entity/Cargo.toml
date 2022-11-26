@@ -10,5 +10,5 @@ uuid = { version = "1", features = ["serde", "v4"] }
 
 [dependencies.sea-orm]
 default-features = false
-features = ["macros", "with-uuid"]
+features = ["macros", "with-chrono", "with-json", "with-uuid"]
 version = "0.11"
