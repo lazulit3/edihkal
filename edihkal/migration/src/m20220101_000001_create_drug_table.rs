@@ -24,7 +24,7 @@ impl MigrationTrait for Migration {
 }
 
 #[derive(Iden)]
-enum Drug {
+pub(crate) enum Drug {
     Table,
     Id,
     Name,
