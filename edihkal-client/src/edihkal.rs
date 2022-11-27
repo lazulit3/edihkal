@@ -1,6 +1,6 @@
 use serde::{de::DeserializeOwned, Serialize};
 
-use crate::errors::Error;
+use crate::Error;
 
 /// A client to the edihkal API.
 pub struct Client {
@@ -8,10 +8,10 @@ pub struct Client {
     base_url: String,
 }
 
-/// Defines output types for different endpoints.
-pub trait Endpoint {
-    type NewModel: Serialize;
-    type Model: DeserializeOwned;
+/// Request and response payload types for an endpoint.
+pub trait Payloads {
+    type Request: Serialize;
+    type Response: DeserializeOwned;
 }
 
 impl Client {
@@ -27,23 +27,23 @@ impl Client {
 
     /// Sends a GET request to the edihkal API service.
     #[tracing::instrument(level = "debug", skip(self))]
-    pub async fn get<E: Endpoint>(&self, path: &str) -> Result<Vec<E::Model>, Error> {
+    pub async fn get<P: Payloads>(&self, path: &str) -> Result<P::Response, Error> {
         let response = self
             .client
             .get(&self.url(path))
             .header("Accept", "application/json")
             .send()
             .await;
-        Self::process_response::<Vec<E::Model>>(response).await
+        Self::process_response::<P::Response>(response).await
     }
 
     /// Sends a POST request to the edihkal API service.
     #[tracing::instrument(level = "debug", skip(self, data))]
-    pub async fn post<E: Endpoint>(
+    pub async fn post<P: Payloads>(
         &self,
         path: &str,
-        data: E::NewModel,
-    ) -> Result<E::Model, Error> {
+        data: P::Request,
+    ) -> Result<P::Response, Error> {
         let response = self
             .client
             .post(&self.url(path))
@@ -52,7 +52,7 @@ impl Client {
             .json(&data)
             .send()
             .await;
-        Self::process_response::<E::Model>(response).await
+        Self::process_response::<P::Response>(response).await
     }
 
     /// Deserializes response's JSON data or propagate errors as [`edihkal_client::Error`].
@@ -89,7 +89,7 @@ mod tests {
         Mock, MockServer, ResponseTemplate,
     };
 
-    use crate::drugs::DrugEndpoint;
+    use crate::drugs::{DrugsEndpoint, NewDrugEndpoint};
 
     use super::Client;
 
@@ -117,7 +117,7 @@ mod tests {
 
         // Act
         client
-            .get::<DrugEndpoint>("/drugs")
+            .get::<DrugsEndpoint>("/drugs")
             .await
             .expect("GET request failed");
     }
@@ -146,7 +146,7 @@ mod tests {
 
         // Act
         client
-            .post::<DrugEndpoint>("/drugs", request_body)
+            .post::<NewDrugEndpoint>("/drugs", request_body)
             .await
             .expect("POST request failed");
     }
