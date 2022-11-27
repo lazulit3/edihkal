@@ -49,7 +49,7 @@ mod tests {
         let client = Client::new(mock_uri);
 
         let new_drug = NewDrug::new("ketamine");
-        let response_body = drug::Model::new("ketamine");
+        let response_body = drug::Model::from(new_drug.clone());
 
         Mock::given(method("POST"))
             .and(path("/drugs"))

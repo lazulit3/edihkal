@@ -101,3 +101,14 @@ impl NewEntry {
         }
     }
 }
+
+impl From<NewEntry> for Model {
+    fn from(entry: NewEntry) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            dose: entry.dose,
+            drug_id: entry.drug_id,
+            time: entry.time,
+        }
+    }
+}
