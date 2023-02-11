@@ -1,4 +1,6 @@
 mod drugs;
+mod entries;
+
 mod edihkal;
 mod errors;
 

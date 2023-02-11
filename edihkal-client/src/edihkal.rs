@@ -1,3 +1,4 @@
+use reqwest::RequestBuilder;
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::Error;
@@ -28,12 +29,7 @@ impl Client {
     /// Sends a GET request to the edihkal API service.
     #[tracing::instrument(level = "debug", skip(self))]
     pub async fn get<P: Payloads>(&self, path: &str) -> Result<P::Response, Error> {
-        let response = self
-            .client
-            .get(&self.url(path))
-            .header("Accept", "application/json")
-            .send()
-            .await;
+        let response = self.build_get_request(path).send().await;
         Self::process_response::<P::Response>(response).await
     }
 
@@ -44,15 +40,19 @@ impl Client {
         path: &str,
         data: P::Request,
     ) -> Result<P::Response, Error> {
-        let response = self
-            .client
-            .post(&self.url(path))
+        let response = self.build_post_request(path).json(&data).send().await;
+        Self::process_response::<P::Response>(response).await
+    }
+
+    fn build_get_request(&self, path: &str) -> RequestBuilder {
+        self.client.get(self.url(path)).header("Accept", "application/json")
+    }
+
+    fn build_post_request(&self, path: &str) -> RequestBuilder {
+        self.client
+            .post(self.url(path))
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
-            .json(&data)
-            .send()
-            .await;
-        Self::process_response::<P::Response>(response).await
     }
 
     /// Deserializes response's JSON data or propagate errors as [`edihkal_client::Error`].

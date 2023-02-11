@@ -714,6 +714,7 @@ dependencies = [
 name = "edihkal-client"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "edihkal_tracing",
  "entity",
  "reqwest",
@@ -722,6 +723,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
+ "uuid",
  "wiremock",
 ]
 
