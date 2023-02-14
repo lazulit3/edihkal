@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use axum::{body::Body, http::StatusCode, routing::get, Extension, Router};
+use axum::{http::StatusCode, routing::get, Router};
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use secrecy::ExposeSecret;
 use tower::ServiceBuilder;
@@ -14,18 +14,17 @@ use crate::{
     drugs::{define_drug, get_drugs},
 };
 
-pub async fn app(configuration: &Settings) -> Result<Router<Body>> {
+pub async fn app(configuration: &Settings) -> Result<Router> {
     let db_settings = &configuration.database;
     let db = db_connection(db_settings).await?;
     migrate(&db).await?;
     Ok(router(db))
 }
 
-pub fn router(db: DatabaseConnection) -> Router<Body> {
+pub fn router(db: DatabaseConnection) -> Router {
     Router::new()
         .route("/health_check", get(|| async { StatusCode::OK }))
         .route("/drugs", get(get_drugs).post(define_drug))
-        .layer(Extension(db))
         .layer(
             ServiceBuilder::new()
                 .set_x_request_id(MakeRequestUuid)
@@ -36,6 +35,7 @@ pub fn router(db: DatabaseConnection) -> Router<Body> {
                 )
                 .propagate_x_request_id(),
         )
+        .with_state(db)
 }
 
 pub async fn db_connection(db_settings: &DatabaseSettings) -> Result<DatabaseConnection> {
