@@ -10,4 +10,4 @@ serde = "1.0.145"
 [dependencies.sea-orm]
 default-features = false
 features = ["macros", "with-uuid"]
-version = "0.10.1"
+version = "0.11"
