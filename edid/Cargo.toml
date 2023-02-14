@@ -12,7 +12,7 @@ edihkal-client = { version = "0.1.0", path = "../edihkal-client" }
 figment = { version = "0.10.8", features = ["env", "toml"] }
 serde = { version = "1.0.145", features = ["derive"] }
 thiserror = "1.0.37"
-tokio = { version = "1.20.1", features = ["macros", "rt"] }
+tokio = { version = "1.25", features = ["macros", "rt"] }
 
 [dev-dependencies]
 rstest = "0.15.0"
