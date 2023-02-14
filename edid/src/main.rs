@@ -1,5 +1,9 @@
 mod cli;
+mod client;
+mod cmd;
 mod config;
+
+use client::client;
 
 use anyhow::Result;
 use clap::Parser;
