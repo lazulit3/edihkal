@@ -85,7 +85,7 @@ mod tests {
 
     use entity::{drug, drug::NewDrug};
     use wiremock::{
-        matchers::{body_json, method, path},
+        matchers::{body_json, header, method, path},
         Mock, MockServer, ResponseTemplate,
     };
 
@@ -109,6 +109,7 @@ mod tests {
 
         Mock::given(method("GET"))
             .and(path("/drugs"))
+            .and(header("Accept", "application/json"))
             .respond_with(ResponseTemplate::new(200).set_body_json(response_body))
             .expect(1) // Assert
             .mount(&mock_server)
@@ -135,6 +136,8 @@ mod tests {
 
         Mock::given(method("POST"))
             .and(path("/drugs"))
+            .and(header("Accept", "application/json"))
+            .and(header("Content-Type", "application/json"))
             .and(body_json(&request_body))
             .respond_with(ResponseTemplate::new(200).set_body_json(response_body))
             .expect(1) // Assert
