@@ -31,7 +31,7 @@ impl Client {
         let response = self
             .client
             .get(&self.url(path))
-            .header("Accept", "appliation/json")
+            .header("Accept", "application/json")
             .send()
             .await;
         Self::process_response::<Vec<E::Model>>(response).await
@@ -47,7 +47,7 @@ impl Client {
         let response = self
             .client
             .post(&self.url(path))
-            .header("Accept", "appliation/json")
+            .header("Accept", "application/json")
             .header("Content-Type", "application/json")
             .json(&data)
             .send()
