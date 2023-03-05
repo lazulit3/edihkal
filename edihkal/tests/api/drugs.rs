@@ -116,3 +116,33 @@ async fn get_drugs_returns_list_of_drugs() {
         assert!(!drug.id().is_nil());
     }
 }
+
+#[tokio::test]
+async fn get_drugs_filters_by_name() {
+    // Arrange
+    let service = TestService::new().await;
+    let edihkal_client = edihkal_client::Client::new(service.service_url().to_string());
+    let http_client = http::Client::new(service.service_url());
+
+    let defined_drug_names = vec!["phencyclidine", "salvia"];
+    define_drugs(&edihkal_client, &defined_drug_names).await;
+
+    // Act
+    // Request list of defined drugs with name "salvia"
+    let response = http_client
+        .get("/drugs?name=salvia")
+        .header("Content-Type", "application/json")
+        .send()
+        .await;
+
+    // Assert
+    assert_eq!(response.status(), StatusCode::OK);
+
+    // Response JSON should deserialize into list of drug models.
+    let drugs: Vec<drug::Model> = response.json().await;
+
+    // edihkal should return only one drug named "salvia" with a non-nil `Uuid`
+    assert_eq!(1, drugs.len());
+    assert_eq!(drugs[0].name(), "salvia");
+    assert!(!drugs[0].id().is_nil());
+}
