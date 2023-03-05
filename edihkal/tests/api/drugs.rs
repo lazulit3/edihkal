@@ -4,6 +4,8 @@ use entity::{drug, drug::NewDrug, Drug};
 use sea_orm::EntityTrait;
 use uuid::Uuid;
 
+use crate::helpers::define_drugs;
+
 use super::helpers::{http, TestService};
 
 #[tokio::test]
@@ -88,12 +90,8 @@ async fn get_drugs_returns_list_of_drugs() {
     let edihkal_client = edihkal_client::Client::new(service.service_url().to_string());
     let http_client = http::Client::new(service.service_url());
 
-    // Define drugs with these names
-    let defined_drugs = vec!["gamma-hydroxybutyrate", "hydrocodone"];
-    for drug_name in &defined_drugs {
-        let drug = NewDrug::new(*drug_name);
-        edihkal_client.define_drug(drug).await.unwrap();
-    }
+    let defined_drug_names = vec!["gamma-hydroxybutyrate", "hydrocodone"];
+    define_drugs(&edihkal_client, &defined_drug_names).await;
 
     // Act
     // Request list of defined drugs from API
@@ -110,11 +108,11 @@ async fn get_drugs_returns_list_of_drugs() {
     let drugs: Vec<drug::Model> = response.json().await;
 
     // edihkal should return the same quantity of drugs as what we defined.
-    assert_eq!(defined_drugs.len(), drugs.len());
+    assert_eq!(defined_drug_names.len(), drugs.len());
 
     // Each drug should have a name from `drug_names` and a non-nil `Uuid`
     for drug in drugs {
-        assert!(defined_drugs.contains(&drug.name()));
+        assert!(defined_drug_names.contains(&drug.name()));
         assert!(!drug.id().is_nil());
     }
 }
