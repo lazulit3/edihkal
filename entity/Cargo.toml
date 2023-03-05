@@ -5,7 +5,8 @@ publish = false
 edition.workspace = true
 
 [dependencies]
-serde = "1.0.145"
+serde = { version = "1.0", features = ["derive"] }
+uuid = { version = "1", features = ["serde", "v4"] }
 
 [dependencies.sea-orm]
 default-features = false
