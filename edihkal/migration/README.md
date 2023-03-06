@@ -1,4 +1,22 @@
-# Running Migrator CLI
+# `migration` crate
+
+## Updating `entity` after changes to `migration`
+
+Ensure localdev database container is running (`edihkal/localdev/init_db.sh`).
+
+Apply migrations to a fresh database:
+
+``` sh
+cargo run -- fresh
+```
+
+Generate entity files (run from workspace root):
+
+``` sh
+sea-orm-cli generate entity --lib -o entity/src/ --with-serde both
+```
+
+## Running Migrator CLI
 
 - Generate a new migration file
     ```sh
