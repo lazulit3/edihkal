@@ -672,6 +672,7 @@ dependencies = [
  "anyhow",
  "clap 4.0.10",
  "edihkal-client",
+ "edihkal_tracing",
  "figment",
  "rstest",
  "serde",
