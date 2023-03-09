@@ -7,9 +7,11 @@ use client::client;
 
 use anyhow::Result;
 use clap::Parser;
+use edihkal_tracing::configure_tracing;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<()> {
+    configure_tracing("edid", "off", std::io::stdout);
     let opts = cli::Opts::parse();
     cli::run_command(opts).await
 }
