@@ -1,10 +1,18 @@
-use axum::extract::{Path, State};
-use axum::{http::StatusCode, Json};
-use sea_orm::{ActiveModelTrait, DatabaseConnection, DbErr, EntityTrait, IntoActiveModel};
-
-use entity::drug;
-use entity::{drug::NewDrug, Drug};
+use axum::{
+    extract::{Path, State},
+    http::{header, StatusCode},
+    response::{IntoResponse, Response},
+    Json,
+};
+use sea_orm::{prelude::*, IntoActiveModel};
 use uuid::Uuid;
+
+use entity::{
+    drug::{self, NewDrug},
+    Drug,
+};
+
+use crate::errors::DatabaseError;
 
 #[tracing::instrument(skip(db))]
 pub async fn get_drug(
@@ -39,28 +47,59 @@ pub async fn get_drugs(
 pub async fn define_drug(
     State(db): State<DatabaseConnection>,
     Json(drug): Json<NewDrug>,
-) -> Result<(StatusCode, Json<drug::Model>), (StatusCode, &'static str)> {
-    let drug = insert_drug(&db, drug).await.map_err(|_| {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Failed to insert new drug into database",
-        )
-    })?;
-    Ok((StatusCode::CREATED, Json(drug)))
+) -> Response {
+    match insert_drug(&db, drug.clone()).await {
+        Ok(drug) => (StatusCode::CREATED, Json(drug)).into_response(), // TODO
+        Err(DatabaseError::UniqueViolation) => {
+            see_other_drug_with_name(&db, &drug.name).await.into_response()
+        }
+        _ => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    }
+}
+
+/// Returns 303 See Other redirect to Drug named `drug_name`.
+async fn see_other_drug_with_name(
+    db: &DatabaseConnection,
+    drug_name: &str,
+) -> Result<impl IntoResponse, StatusCode> {
+    match select_drug_with_name(db, drug_name).await {
+        Ok(Some(drug)) => Ok((
+            StatusCode::SEE_OTHER,
+            [(header::LOCATION, format!("/drugs/{}", drug.id()))],
+            format!("A drug with the same name ({}) already exists", drug.name()),
+        )),
+        _ => Err(StatusCode::INTERNAL_SERVER_ERROR),
+    }
 }
 
 /// Inserts a new drug into the database.
 #[tracing::instrument(name = "Inserting drug into database", skip(db), fields(drug = drug.name))]
-pub async fn insert_drug(db: &DatabaseConnection, drug: NewDrug) -> Result<drug::Model, DbErr> {
-    let drug = drug.into_active_model().insert(db).await?;
+pub async fn insert_drug(
+    db: &DatabaseConnection,
+    drug: NewDrug,
+) -> Result<drug::Model, DatabaseError> {
+    let drug = drug
+        .into_active_model()
+        .insert(db)
+        .await
+        .map_err(Into::<DatabaseError>::into)?;
     Ok(drug)
 }
 
 /// Select a drug by ID from the database.
-#[tracing::instrument(name = "Selecting drug", skip(db))]
+#[tracing::instrument(skip(db))]
 pub async fn select_drug(
     db: &DatabaseConnection,
     drug_id: Uuid,
 ) -> Result<Option<drug::Model>, DbErr> {
     Drug::find_by_id(drug_id).one(db).await
+}
+
+#[tracing::instrument(skip(db), fields(drug = drug_name))]
+async fn select_drug_with_name(
+    db: &DatabaseConnection,
+    drug_name: &str,
+) -> Result<Option<drug::Model>, DbErr> {
+    let drug = Drug::find().filter(drug::Column::Name.eq(drug_name)).one(db).await?;
+    Ok(drug)
 }
