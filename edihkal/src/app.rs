@@ -9,6 +9,7 @@ use tower_http::{request_id::MakeRequestUuid, trace::TraceLayer};
 
 use migration::{Migrator, MigratorTrait};
 
+use crate::drugs::get_drug;
 use crate::{
     configuration::{DatabaseSettings, Settings},
     drugs::{define_drug, get_drugs},
@@ -25,6 +26,7 @@ pub fn router(db: DatabaseConnection) -> Router {
     Router::new()
         .route("/health_check", get(|| async { StatusCode::OK }))
         .route("/drugs", get(get_drugs).post(define_drug))
+        .route("/drugs/:id", get(get_drug))
         .layer(
             ServiceBuilder::new()
                 .set_x_request_id(MakeRequestUuid)

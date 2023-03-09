@@ -1,11 +1,13 @@
 use axum::http::StatusCode;
+use edihkal::drugs::insert_drug;
 use entity::{drug, drug::NewDrug, Drug};
 use sea_orm::EntityTrait;
+use uuid::Uuid;
 
 use super::helpers::{http, TestService};
 
 #[tokio::test]
-async fn define_drug_returns_200_for_valid_data() {
+async fn define_drug_returns_201_for_valid_data() {
     let service = TestService::new().await;
     let client = http::Client::new(service.service_url());
     let db = service.database_connection();
@@ -19,7 +21,7 @@ async fn define_drug_returns_200_for_valid_data() {
         .send()
         .await;
 
-    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(response.status(), StatusCode::CREATED);
 
     match Drug::find().one(db).await.unwrap() {
         Some(drug) => assert_eq!(drug.name(), "caffeine"),
@@ -39,6 +41,40 @@ async fn define_drug_returns_400_for_missing_data() {
         .await;
 
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+}
+
+#[tokio::test]
+async fn get_drug_returns_200_and_drug() {
+    // Arrange
+    let service = TestService::new().await;
+    let db = service.database_connection();
+    let client = http::Client::new(service.service_url());
+
+    let defined_drug = insert_drug(db, NewDrug::new("aporphine")).await.unwrap();
+
+    // Act
+    let path = format!("/drugs/{}", defined_drug.id());
+    let drug_response = client.get(&path).header("Accept", "application/json").send().await;
+
+    // Assert
+    assert_eq!(drug_response.status(), StatusCode::OK);
+    let drug: drug::Model = drug_response.json().await;
+    assert_eq!(drug.name(), defined_drug.name());
+    assert_eq!(drug.id(), defined_drug.id());
+}
+
+#[tokio::test]
+async fn get_drug_returns_404_not_found() {
+    // Arrange
+    let service = TestService::new().await;
+    let client = http::Client::new(service.service_url());
+
+    // Act
+    let path = format!("/drugs/{}", Uuid::new_v4());
+    let drug_response = client.get(&path).header("Accept", "application/json").send().await;
+
+    // Assert
+    assert_eq!(drug_response.status(), StatusCode::NOT_FOUND);
 }
 
 #[tokio::test]
