@@ -7,7 +7,7 @@ use uuid::Uuid;
 use super::helpers::{http, TestService};
 
 #[tokio::test]
-async fn define_drug_returns_200_for_valid_data() {
+async fn define_drug_returns_201_for_valid_data() {
     let service = TestService::new().await;
     let client = http::Client::new(service.service_url());
     let db = service.database_connection();
@@ -21,7 +21,7 @@ async fn define_drug_returns_200_for_valid_data() {
         .send()
         .await;
 
-    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(response.status(), StatusCode::CREATED);
 
     match Drug::find().one(db).await.unwrap() {
         Some(drug) => assert_eq!(drug.name(), "caffeine"),

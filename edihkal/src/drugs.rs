@@ -39,14 +39,14 @@ pub async fn get_drugs(
 pub async fn define_drug(
     State(db): State<DatabaseConnection>,
     Json(drug): Json<NewDrug>,
-) -> Result<Json<drug::Model>, (StatusCode, &'static str)> {
+) -> Result<(StatusCode, Json<drug::Model>), (StatusCode, &'static str)> {
     let drug = insert_drug(&db, drug).await.map_err(|_| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             "Failed to insert new drug into database",
         )
     })?;
-    Ok(Json(drug))
+    Ok((StatusCode::CREATED, Json(drug)))
 }
 
 /// Inserts a new drug into the database.
