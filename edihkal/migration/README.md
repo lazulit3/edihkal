@@ -20,7 +20,7 @@ sea-orm-cli generate entity --lib -o entity/src/ --with-serde both
 
 - Generate a new migration file
     ```sh
-    cargo run -- migrate generate MIGRATION_NAME
+    cargo run -- generate MIGRATION_NAME
     ```
 - Apply all pending migrations
     ```sh
