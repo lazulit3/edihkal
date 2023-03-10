@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use reqwest::RequestBuilder;
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -15,6 +17,17 @@ pub trait Payloads {
     type Response: DeserializeOwned;
 }
 
+#[derive(Debug)]
+pub struct Filters {
+    pub filters: HashMap<String, String>,
+}
+
+impl Filters {
+    pub fn new(filters: HashMap<String, String>) -> Self {
+        Self { filters }
+    }
+}
+
 impl Client {
     /// Constructs a client to an edihkal service at a given base URL.
     pub fn new<S: Into<String>>(base_url: S) -> Client {
@@ -28,8 +41,12 @@ impl Client {
 
     /// Sends a GET request to the edihkal API service.
     #[tracing::instrument(level = "debug", skip(self))]
-    pub async fn get<P: Payloads>(&self, path: &str) -> Result<P::Response, Error> {
-        let response = self.build_get_request(path).send().await;
+    pub async fn get<P: Payloads>(
+        &self,
+        path: &str,
+        filters: Option<Filters>,
+    ) -> Result<P::Response, Error> {
+        let response = self.build_get_request(path, filters).send().await;
         Self::process_response::<P::Response>(response).await
     }
 
@@ -44,8 +61,13 @@ impl Client {
         Self::process_response::<P::Response>(response).await
     }
 
-    fn build_get_request(&self, path: &str) -> RequestBuilder {
-        self.client.get(self.url(path)).header("Accept", "application/json")
+    fn build_get_request(&self, path: &str, filters: Option<Filters>) -> RequestBuilder {
+        let mut request = self.client.get(self.url(path)).header("Accept", "application/json");
+
+        if let Some(filters) = filters {
+            request = request.query(&filters.filters);
+        }
+        request
     }
 
     fn build_post_request(&self, path: &str) -> RequestBuilder {
@@ -117,7 +139,7 @@ mod tests {
 
         // Act
         client
-            .get::<DrugsEndpoint>("/drugs")
+            .get::<DrugsEndpoint>("/drugs", None)
             .await
             .expect("GET request failed");
     }

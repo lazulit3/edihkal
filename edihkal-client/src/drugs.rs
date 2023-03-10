@@ -1,9 +1,11 @@
+use std::collections::HashMap;
+
 // Re-export drug Model as Drug for client-side apps.
 use entity::drug::Model as Drug;
 use entity::drug::NewDrug;
 
 use crate::{
-    edihkal::{Client, Payloads},
+    edihkal::{Client, Filters, Payloads},
     errors::Error,
 };
 
@@ -29,7 +31,15 @@ impl Client {
     /// Get defined drugs from edihkal.
     #[tracing::instrument(level = "debug", skip(self))]
     pub async fn get_drugs(&self) -> Result<Vec<Drug>, Error> {
-        self.get::<DrugsEndpoint>("/drugs").await
+        self.get::<DrugsEndpoint>("/drugs", None).await
+    }
+
+    /// Get a drug by name.
+    #[tracing::instrument(level = "debug", skip(self))]
+    pub async fn get_drug_with_name(&self, name: String) -> Result<Option<Drug>, Error> {
+        let filters = Filters::new(HashMap::from([(String::from("name"), name)]));
+        let drugs = self.get::<DrugsEndpoint>("/drugs", Some(filters)).await?;
+        Ok(drugs.first().cloned())
     }
 }
 
