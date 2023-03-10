@@ -1,10 +1,12 @@
+use std::collections::HashMap;
+
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::{header, StatusCode},
     response::{IntoResponse, Response},
     Json,
 };
-use sea_orm::{prelude::*, IntoActiveModel};
+use sea_orm::{prelude::*, IntoActiveModel, QueryTrait};
 use uuid::Uuid;
 
 use entity::{
@@ -29,16 +31,29 @@ pub async fn get_drug(
     }
 }
 
+/// Get drugs defined in edihkal.
+///
+/// Responds with a JSON list of drugs matching the query.
+///
+/// /drugs - Get all defined Drugs
+/// /drugs?name=methaqualone - Get Drugs named "methaqualone"
 #[tracing::instrument(name = "Getting drugs", skip(db))]
 pub async fn get_drugs(
+    Query(params): Query<HashMap<String, String>>,
     State(db): State<DatabaseConnection>,
 ) -> Result<Json<Vec<drug::Model>>, (StatusCode, &'static str)> {
-    let drugs = Drug::find().all(&db).await.map_err(|_| {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Failed to get defined drugs",
-        )
-    })?;
+    let drugs = Drug::find()
+        .apply_if(params.get("name"), |query, name| {
+            query.filter(drug::Column::Name.eq(name))
+        })
+        .all(&db)
+        .await
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to get defined drugs",
+            )
+        })?;
     Ok(Json(drugs))
 }
 

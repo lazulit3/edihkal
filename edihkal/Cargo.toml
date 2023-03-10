@@ -7,7 +7,7 @@ edition.workspace = true
 
 [dependencies]
 anyhow = "1.0.65"
-axum = { version = "0.6.6", default-features = false, features = ["http1", "json", "tokio"] }
+axum = { version = "0.6.6", default-features = false, features = ["http1", "json", "query", "tokio"] }
 config = { version = "0.13.2", default-features = false, features = ["yaml"] }
 edihkal_tracing = { path = "../edihkal_tracing" }
 entity = { path = "../entity" }
@@ -26,6 +26,7 @@ uuid = { version = "1.1.2", features = ["v4"] }
 
 [dev-dependencies]
 bytes = "1"
+chrono = { version = "0.4.23", default-features = false, features = ["clock"] }
 edihkal-client = { version = "0.1.0", path = "../edihkal-client" }
 # Enable test-helpers on edihkal_tracing when running tests
 edihkal_tracing = { path = "../edihkal_tracing", features = ["test-helpers"] }

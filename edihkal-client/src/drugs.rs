@@ -1,30 +1,45 @@
+use std::collections::HashMap;
+
 // Re-export drug Model as Drug for client-side apps.
 use entity::drug::Model as Drug;
 use entity::drug::NewDrug;
 
 use crate::{
-    edihkal::{Client, Endpoint},
+    edihkal::{Client, Filters, Payloads},
     errors::Error,
 };
 
-pub(crate) struct DrugEndpoint;
+pub(crate) struct NewDrugEndpoint;
+impl Payloads for NewDrugEndpoint {
+    type Request = NewDrug;
+    type Response = Drug;
+}
 
-impl Endpoint for DrugEndpoint {
-    type NewModel = NewDrug;
-    type Model = Drug;
+pub(crate) struct DrugsEndpoint;
+impl Payloads for DrugsEndpoint {
+    type Request = ();
+    type Response = Vec<Drug>;
 }
 
 impl Client {
     /// Define a drug in edihkal.
     #[tracing::instrument(level = "debug", skip(self))]
     pub async fn define_drug(&self, drug: NewDrug) -> Result<Drug, Error> {
-        self.post::<DrugEndpoint>("/drugs", drug).await
+        self.post::<NewDrugEndpoint>("/drugs", drug).await
     }
 
-    /// Get defind drugs from edihkal.
+    /// Get defined drugs from edihkal.
     #[tracing::instrument(level = "debug", skip(self))]
     pub async fn get_drugs(&self) -> Result<Vec<Drug>, Error> {
-        self.get::<DrugEndpoint>("/drugs").await
+        self.get::<DrugsEndpoint>("/drugs", None).await
+    }
+
+    /// Get a drug by name.
+    #[tracing::instrument(level = "debug", skip(self))]
+    pub async fn get_drug_with_name(&self, name: String) -> Result<Option<Drug>, Error> {
+        let filters = Filters::new(HashMap::from([(String::from("name"), name)]));
+        let drugs = self.get::<DrugsEndpoint>("/drugs", Some(filters)).await?;
+        Ok(drugs.first().cloned())
     }
 }
 
@@ -49,7 +64,7 @@ mod tests {
         let client = Client::new(mock_uri);
 
         let new_drug = NewDrug::new("ketamine");
-        let response_body = drug::Model::new("ketamine");
+        let response_body = drug::Model::from(new_drug.clone());
 
         Mock::given(method("POST"))
             .and(path("/drugs"))

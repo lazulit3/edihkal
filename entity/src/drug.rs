@@ -78,6 +78,15 @@ impl NewDrug {
     }
 }
 
+impl From<NewDrug> for Model {
+    fn from(drug: NewDrug) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            name: drug.name,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{ActiveModel, NewDrug};

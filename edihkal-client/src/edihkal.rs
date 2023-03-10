@@ -1,6 +1,10 @@
+use std::collections::HashMap;
+use std::fmt::Debug;
+
+use reqwest::RequestBuilder;
 use serde::{de::DeserializeOwned, Serialize};
 
-use crate::errors::Error;
+use crate::Error;
 
 /// A client to the edihkal API.
 pub struct Client {
@@ -8,10 +12,21 @@ pub struct Client {
     base_url: String,
 }
 
-/// Defines output types for different endpoints.
-pub trait Endpoint {
-    type NewModel: Serialize;
-    type Model: DeserializeOwned;
+/// Request and response payload types for an endpoint.
+pub trait Payloads {
+    type Request: Serialize + Debug;
+    type Response: DeserializeOwned;
+}
+
+#[derive(Debug)]
+pub struct Filters {
+    pub filters: HashMap<String, String>,
+}
+
+impl Filters {
+    pub fn new(filters: HashMap<String, String>) -> Self {
+        Self { filters }
+    }
 }
 
 impl Client {
@@ -27,32 +42,40 @@ impl Client {
 
     /// Sends a GET request to the edihkal API service.
     #[tracing::instrument(level = "debug", skip(self))]
-    pub async fn get<E: Endpoint>(&self, path: &str) -> Result<Vec<E::Model>, Error> {
-        let response = self
-            .client
-            .get(&self.url(path))
-            .header("Accept", "application/json")
-            .send()
-            .await;
-        Self::process_response::<Vec<E::Model>>(response).await
+    pub async fn get<P: Payloads>(
+        &self,
+        path: &str,
+        filters: Option<Filters>,
+    ) -> Result<P::Response, Error> {
+        let response = self.build_get_request(path, filters).send().await;
+        Self::process_response::<P::Response>(response).await
     }
 
     /// Sends a POST request to the edihkal API service.
-    #[tracing::instrument(level = "debug", skip(self, data))]
-    pub async fn post<E: Endpoint>(
+    #[tracing::instrument(level = "debug", skip(self))]
+    pub async fn post<P: Payloads>(
         &self,
         path: &str,
-        data: E::NewModel,
-    ) -> Result<E::Model, Error> {
-        let response = self
-            .client
-            .post(&self.url(path))
+        data: P::Request,
+    ) -> Result<P::Response, Error> {
+        let response = self.build_post_request(path).json(&data).send().await;
+        Self::process_response::<P::Response>(response).await
+    }
+
+    fn build_get_request(&self, path: &str, filters: Option<Filters>) -> RequestBuilder {
+        let mut request = self.client.get(self.url(path)).header("Accept", "application/json");
+
+        if let Some(filters) = filters {
+            request = request.query(&filters.filters);
+        }
+        request
+    }
+
+    fn build_post_request(&self, path: &str) -> RequestBuilder {
+        self.client
+            .post(self.url(path))
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
-            .json(&data)
-            .send()
-            .await;
-        Self::process_response::<E::Model>(response).await
     }
 
     /// Deserializes response's JSON data or propagate errors as [`edihkal_client::Error`].
@@ -89,7 +112,7 @@ mod tests {
         Mock, MockServer, ResponseTemplate,
     };
 
-    use crate::drugs::DrugEndpoint;
+    use crate::drugs::{DrugsEndpoint, NewDrugEndpoint};
 
     use super::Client;
 
@@ -117,7 +140,7 @@ mod tests {
 
         // Act
         client
-            .get::<DrugEndpoint>("/drugs")
+            .get::<DrugsEndpoint>("/drugs", None)
             .await
             .expect("GET request failed");
     }
@@ -146,7 +169,7 @@ mod tests {
 
         // Act
         client
-            .post::<DrugEndpoint>("/drugs", request_body)
+            .post::<NewDrugEndpoint>("/drugs", request_body)
             .await
             .expect("POST request failed");
     }

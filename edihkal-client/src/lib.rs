@@ -1,4 +1,6 @@
 mod drugs;
+mod entries;
+
 mod edihkal;
 mod errors;
 
@@ -7,3 +9,4 @@ pub use errors::Error;
 
 /// Re-exports for client-side apps.
 pub use entity::drug::NewDrug;
+pub use entity::entry::NewEntry;
