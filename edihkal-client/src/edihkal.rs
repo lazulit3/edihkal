@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::Debug;
 
 use reqwest::RequestBuilder;
 use serde::{de::DeserializeOwned, Serialize};
@@ -13,7 +14,7 @@ pub struct Client {
 
 /// Request and response payload types for an endpoint.
 pub trait Payloads {
-    type Request: Serialize;
+    type Request: Serialize + Debug;
     type Response: DeserializeOwned;
 }
 
@@ -51,7 +52,7 @@ impl Client {
     }
 
     /// Sends a POST request to the edihkal API service.
-    #[tracing::instrument(level = "debug", skip(self, data))]
+    #[tracing::instrument(level = "debug", skip(self))]
     pub async fn post<P: Payloads>(
         &self,
         path: &str,
