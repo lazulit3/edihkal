@@ -12,7 +12,7 @@ impl MigrationTrait for Migration {
                     .table(Drug::Table)
                     .if_not_exists()
                     .col(ColumnDef::new(Drug::Id).uuid().not_null().primary_key())
-                    .col(ColumnDef::new(Drug::Name).string().not_null())
+                    .col(ColumnDef::new(Drug::Name).string().unique_key().not_null())
                     .to_owned(),
             )
             .await
