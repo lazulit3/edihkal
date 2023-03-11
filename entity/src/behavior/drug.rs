@@ -50,3 +50,30 @@ impl From<NewDrug> for Model {
         Self::new(drug.name)
     }
 }
+
+impl PartialEq<NewDrug> for Model {
+    fn eq(&self, other: &NewDrug) -> bool {
+        self.name() == other.name
+    }
+}
+
+impl PartialEq<Model> for NewDrug {
+    fn eq(&self, other: &Model) -> bool {
+        self.name == other.name()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{drug::Model, NewDrug};
+
+    #[test]
+    fn new_drug_model_partial_eq() {
+        let drug_name = "Amyl Nitrite";
+        let drug = Model::new(drug_name);
+        let new_drug = NewDrug::new(drug_name);
+
+        assert_eq!(drug, new_drug);
+        assert_eq!(new_drug, drug);
+    }
+}
