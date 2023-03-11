@@ -32,8 +32,11 @@ pub async fn get_drug(
 ///
 /// Responds with a JSON list of drugs matching the query.
 ///
-/// /drugs - Get all defined Drugs
-/// /drugs?name=methaqualone - Get Drugs named "methaqualone"
+/// # Query Filters
+/// Query filters may be used to limit results to matching values.
+///
+/// * `/drugs` - Get all drugs (no filters)
+/// * `/drugs?name=methaqualone` - Get Drugs named "methaqualone"
 #[tracing::instrument(name = "Getting drugs", skip(db))]
 pub async fn get_drugs(
     Query(params): Query<HashMap<String, String>>,
@@ -54,9 +57,9 @@ pub async fn get_drugs(
     Ok(Json(drugs))
 }
 
-/// Handles requests to define a `NewDrug`.
-#[tracing::instrument(name = "Defining new drug", skip(db), fields(drug = drug.name))]
-pub async fn define_drug(
+/// Handles requests to create a `NewDrug`.
+#[tracing::instrument(skip(db), fields(drug = drug.name))]
+pub async fn create_drug(
     State(db): State<DatabaseConnection>,
     Json(drug): Json<NewDrug>,
 ) -> Response {

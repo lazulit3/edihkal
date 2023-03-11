@@ -14,8 +14,8 @@ impl MigrationTrait for Migration {
                     .table(Entry::Table)
                     .if_not_exists()
                     .col(ColumnDef::new(Entry::Id).uuid().not_null().primary_key())
-                    .col(ColumnDef::new(Entry::Time).date_time().not_null())
                     .col(ColumnDef::new(Entry::DrugId).uuid().not_null())
+                    .col(ColumnDef::new(Entry::Time).date_time().not_null())
                     .col(ColumnDef::new(Entry::Dose).unsigned().not_null())
                     .foreign_key(
                         ForeignKey::create()
@@ -38,7 +38,7 @@ impl MigrationTrait for Migration {
 enum Entry {
     Table,
     Id,
-    Time,
     DrugId,
+    Time,
     Dose,
 }
