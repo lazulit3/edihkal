@@ -1,7 +1,7 @@
 use axum::{extract::State, http::StatusCode, Json};
 use sea_orm::{ActiveModelTrait, DatabaseConnection, DbErr, IntoActiveModel};
 
-use entity::entry::{self, NewEntry};
+use entity::{entry, NewEntry};
 
 /// Record a new journal entry.
 #[tracing::instrument(name = "Recording new entry", skip(db))]

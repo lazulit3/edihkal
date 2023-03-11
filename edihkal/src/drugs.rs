@@ -9,10 +9,7 @@ use axum::{
 use sea_orm::{prelude::*, IntoActiveModel, QueryTrait};
 use uuid::Uuid;
 
-use entity::{
-    drug::{self, NewDrug},
-    Drug,
-};
+use entity::{drug, Drug, NewDrug};
 
 use crate::errors::DatabaseError;
 

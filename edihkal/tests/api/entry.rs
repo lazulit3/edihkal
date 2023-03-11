@@ -1,5 +1,5 @@
 use edihkal_client::NewDrug;
-use entity::{entry::NewEntry, Entry};
+use entity::{Entry, NewEntry};
 
 use axum::http::StatusCode;
 use chrono::Utc;

@@ -20,7 +20,7 @@ pub async fn new_entry(dose: i32, drug_name: &str, when: &str) -> Result<(), any
         // TODO: Ask to define drug or do it automatically?
         // TODO: Fuzzy search drug names, it might just be a typo?
         .context(format!(
-            "'{drug_name}' not found in edihkal. Typo? Try 'edid define drug {drug_name}'?"
+            "'{drug_name}' not found in edihkal. Typo? Try 'edid drug define {drug_name}'?"
         ))?
         .id();
 

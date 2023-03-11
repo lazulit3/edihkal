@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use edihkal::drugs::insert_drug;
-use entity::{drug, drug::NewDrug, Drug};
+use entity::{drug, Drug, NewDrug};
 use sea_orm::EntityTrait;
 use uuid::Uuid;
 

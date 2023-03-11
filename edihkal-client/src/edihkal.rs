@@ -106,7 +106,7 @@ mod tests {
 
     use edihkal_tracing::test_helpers::lazy_tracing;
 
-    use entity::{drug, drug::NewDrug};
+    use entity::{drug, NewDrug};
     use wiremock::{
         matchers::{body_json, header, method, path},
         Mock, MockServer, ResponseTemplate,
