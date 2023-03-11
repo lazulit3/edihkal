@@ -3,9 +3,9 @@ use sea_orm::{ActiveModelTrait, DatabaseConnection, DbErr, IntoActiveModel};
 
 use entity::{entry, NewEntry};
 
-/// Record a new journal entry.
-#[tracing::instrument(name = "Recording new entry", skip(db))]
-pub async fn new_entry(
+/// Handler to create an entry.
+#[tracing::instrument(skip(db))]
+pub async fn create_entry(
     State(db): State<DatabaseConnection>,
     Json(entry): Json<NewEntry>,
 ) -> Result<Json<entry::Model>, (StatusCode, &'static str)> {

@@ -16,8 +16,8 @@ use migration::{Migrator, MigratorTrait};
 use crate::drugs::get_drug;
 use crate::{
     configuration::{DatabaseSettings, Settings},
-    drugs::{define_drug, get_drugs},
-    entries::new_entry,
+    drugs::{create_drug, get_drugs},
+    entries::create_entry,
 };
 
 pub async fn app(configuration: &Settings) -> Result<Router> {
@@ -30,9 +30,9 @@ pub async fn app(configuration: &Settings) -> Result<Router> {
 pub fn router(db: DatabaseConnection) -> Router {
     Router::new()
         .route("/health_check", get(|| async { StatusCode::OK }))
-        .route("/drugs", get(get_drugs).post(define_drug))
+        .route("/drugs", get(get_drugs).post(create_drug))
         .route("/drugs/:id", get(get_drug))
-        .route("/entries", post(new_entry))
+        .route("/entries", post(create_entry))
         .layer(
             ServiceBuilder::new()
                 .set_x_request_id(MakeRequestUuid)

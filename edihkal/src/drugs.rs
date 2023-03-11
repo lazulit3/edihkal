@@ -54,9 +54,9 @@ pub async fn get_drugs(
     Ok(Json(drugs))
 }
 
-/// Handles requests to define a `NewDrug`.
-#[tracing::instrument(name = "Defining new drug", skip(db), fields(drug = drug.name))]
-pub async fn define_drug(
+/// Handles requests to create a `NewDrug`.
+#[tracing::instrument(skip(db), fields(drug = drug.name))]
+pub async fn create_drug(
     State(db): State<DatabaseConnection>,
     Json(drug): Json<NewDrug>,
 ) -> Response {
