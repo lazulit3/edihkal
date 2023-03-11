@@ -1,5 +1,5 @@
 use entity::entry::Model as Entry;
-use entity::entry::NewEntry;
+use entity::NewEntry;
 
 use crate::{
     edihkal::{Client, Payloads},
@@ -25,7 +25,7 @@ impl Client {
 mod tests {
     use chrono::Local;
     use edihkal_tracing::test_helpers::lazy_tracing;
-    use entity::entry::{self, NewEntry};
+    use entity::{entry, NewEntry};
     use uuid::Uuid;
     use wiremock::{
         matchers::{body_json, method, path},

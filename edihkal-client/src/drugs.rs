@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 // Re-export drug Model as Drug for client-side apps.
 use entity::drug::Model as Drug;
-use entity::drug::NewDrug;
+use entity::NewDrug;
 
 use crate::{
     edihkal::{Client, Filters, Payloads},
@@ -46,7 +46,8 @@ impl Client {
 #[cfg(test)]
 mod tests {
     use edihkal_tracing::test_helpers::lazy_tracing;
-    use entity::drug::{self, NewDrug};
+    use entity::drug;
+    use entity::NewDrug;
     use wiremock::{
         matchers::{body_json, method, path},
         Mock, MockServer, ResponseTemplate,

@@ -7,6 +7,6 @@ mod errors;
 pub use edihkal::Client;
 pub use errors::Error;
 
+pub use entity::NewDrug;
 /// Re-exports for client-side apps.
-pub use entity::drug::NewDrug;
-pub use entity::entry::NewEntry;
+pub use entity::NewEntry;
