@@ -1,6 +1,7 @@
 use axum::http::StatusCode;
 use edihkal::{drugs::insert_drug, entity::Resource};
 use entity::{drug, Drug, NewDrug};
+use reqwest::header;
 use sea_orm::EntityTrait;
 use uuid::Uuid;
 
@@ -145,4 +146,37 @@ async fn get_drugs_filters_by_name() {
     assert_eq!(1, drugs.len());
     assert_eq!(drugs[0].name(), "salvia");
     assert!(!drugs[0].id().is_nil());
+}
+
+// TODO: Test the other case from creates resulting in unique violation (409 Conflict) too.
+#[tokio::test]
+async fn see_other_drug_if_new_drug_already_exists() {
+    // Arrange
+    let service = TestService::new().await;
+    let edihkal_client = edihkal_client::Client::new(service.service_url().to_string());
+    let http_client = http::Client::new(service.service_url());
+
+    let drug = NewDrug::new("Lisdexamfetamine");
+    let defined_drug = edihkal_client.define_drug(drug.clone()).await.unwrap();
+    let drug_id = defined_drug.id();
+
+    // Act
+    let see_other_response = http_client
+        .post("/drugs")
+        .header("Content-Type", "application/json")
+        .json(&drug)
+        .send()
+        .await;
+
+    let location = see_other_response.headers()[header::LOCATION].to_str().unwrap();
+    let redirect_response = http_client
+        .get(location)
+        .header("Content-Type", "application/json")
+        .send()
+        .await;
+
+    // Assert
+    assert_eq!(see_other_response.status(), StatusCode::SEE_OTHER);
+    assert_eq!(location, format!("/drugs/{}", drug_id));
+    assert_eq!(redirect_response.status(), StatusCode::OK);
 }
