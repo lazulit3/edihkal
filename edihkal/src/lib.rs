@@ -4,3 +4,4 @@ pub mod drugs;
 pub mod entries;
 pub mod errors;
 pub mod resource;
+pub mod responses;
