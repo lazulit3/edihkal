@@ -43,6 +43,22 @@ pub enum DatabaseError {
     Unknown(#[from] anyhow::Error),
 }
 
+/// Convert [`ApiError`] into an [`INTERNAL_SERVER_ERROR`][I] and output error info in a trace event.
+///
+/// [I]: axum::http::StatusCode::INTERNAL_SERVER_ERROR
+impl IntoResponse for ApiError {
+    fn into_response(self) -> Response {
+        match self {
+            Self::Conflict => StatusCode::CONFLICT.into_response(),
+            Self::NotFound => StatusCode::NOT_FOUND.into_response(),
+            Self::InternalServerError(err) => {
+                tracing::error!("{:?}", err);
+                StatusCode::INTERNAL_SERVER_ERROR.into_response()
+            }
+        }
+    }
+}
+
 impl From<DbErr> for DatabaseError {
     fn from(error: DbErr) -> Self {
         match error {
@@ -57,23 +73,5 @@ impl From<DbErr> for DatabaseError {
             }
             _ => Self::Unknown(error.into()),
         }
-    }
-}
-
-/// Convert [`ApiError`] into an [`INTERNAL_SERVER_ERROR`][I] and output error info in a trace event.
-///
-/// [I]: axum::http::StatusCode::INTERNAL_SERVER_ERROR
-impl IntoResponse for ApiError {
-    fn into_response(self) -> Response {
-        match self {
-            Self::Conflict => StatusCode::CONFLICT,
-            Self::NotFound => StatusCode::NOT_FOUND,
-            Self::InternalServerError(err) => {
-                // TODO: Check what trace output looks like (does it have context?)
-                tracing::error!("{:?}", err);
-                StatusCode::INTERNAL_SERVER_ERROR
-            }
-        }
-        .into_response()
     }
 }

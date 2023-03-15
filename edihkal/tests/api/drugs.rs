@@ -1,5 +1,5 @@
 use axum::http::StatusCode;
-use edihkal::{drugs::insert_drug, entity::Resource};
+use edihkal::{drugs::insert_drug, resource::Resource};
 use entity::{drug, Drug, NewDrug};
 use reqwest::header;
 use sea_orm::EntityTrait;

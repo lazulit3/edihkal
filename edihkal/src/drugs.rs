@@ -6,18 +6,26 @@ use axum::{
     response::{IntoResponse, Redirect, Response},
     Json,
 };
-use sea_orm::{
-    prelude::*, query::Condition, sea_query::IntoCondition, IntoActiveModel, QueryTrait,
-};
+use sea_orm::{prelude::*, sea_query::IntoCondition, IntoActiveModel};
 use uuid::Uuid;
 
 use entity::{drug, Drug, NewDrug};
 
 use crate::{
     errors::{ApiError, DatabaseError},
+    query::{Filters, QueryParams},
     resource::Resource,
     responses::created,
 };
+
+impl QueryParams for Drug {
+    fn column(query_param: &str) -> Option<Self::Column> {
+        match query_param {
+            "name" => Some(drug::Column::Name),
+            _ => None,
+        }
+    }
+}
 
 #[tracing::instrument(skip(db))]
 pub async fn get_drug(
@@ -43,16 +51,13 @@ pub async fn get_drug(
 /// * `/drugs?name=methaqualone` - Get Drugs named "methaqualone"
 #[tracing::instrument(name = "Getting drugs", skip(db))]
 pub async fn get_drugs(
-    Query(params): Query<HashMap<String, String>>,
+    Query(query): Query<HashMap<String, String>>,
     State(db): State<DatabaseConnection>,
 ) -> Result<Json<Vec<drug::Model>>, ApiError> {
-    let condition = params
-        .get("name")
-        .map(|name| Condition::all().add(drug::Column::Name.eq(name)));
+    let filter = Filters::<Drug>::from_query_string(query);
 
-    let drugs = select_drugs_with_condition(&db, condition)
-        .await
-        .context("Failed to get drugs")?;
+    let drugs = select_drugs(&db, filter).await.context("Failed to get drugs")?;
+
     Ok(Json(drugs))
 }
 
@@ -115,19 +120,16 @@ pub async fn select_drug(
         .context("Failed to select Drug from database")?)
 }
 
-/// Selects drugs matching [`Condition`] from the database.
+/// Selects drugs matching [`condition`](fn@select_drugs#condition) from the database.
 #[tracing::instrument(skip(db))]
-pub async fn select_drugs_with_condition<C>(
+pub async fn select_drugs<C>(
     db: &DatabaseConnection,
-    condition: Option<C>,
+    condition: C,
 ) -> Result<Vec<drug::Model>, DatabaseError>
 where
-    C: std::fmt::Debug + IntoCondition,
+    C: IntoCondition + std::fmt::Debug,
 {
-    Ok(Drug::find()
-        .apply_if(condition, |query, condition| query.filter(condition))
-        .all(db)
-        .await?)
+    Ok(Drug::find().filter(condition).all(db).await?)
 }
 
 /// Returns some drug matching a [`NewDrug`] from the database.
