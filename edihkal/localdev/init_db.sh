@@ -1,19 +1,12 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-localdev_dir="$(dirname -- $( readlink -f -- "$0"; ))"
-
-if ! [ -x "$(command -v pg_isready)" ]; then
-  echo >&2 "Error: pg_isready is not installed."
-  exit 1
-fi
-
-# Default to using podman if CONTAINER_TOOL is not specified.
-CONTAINER_TOOL="${CONTAINER_TOOL:-podman}"
-
-if [[ -z "${SKIP_STARTUP}" ]] && ! [ -x "$(command -v "$CONTAINER_TOOL")" ]; then
-  echo >&2 "Error: Container tool ${CONTAINER_TOOL} is not installed."
-  echo >&2 "You may choose which tool should manage the DB container by setting CONTAINER_TOOL."
+if command -v podman &> /dev/null; then
+  CONTAINER_TOOL="podman"
+elif command -v docker &> /dev/null; then
+  CONTAINER_TOOL="docker"
+else
+  echo "podman or docker must be installed."
   exit 1
 fi
 
@@ -25,9 +18,9 @@ DB_PORT="${POSTGRES_PORT:=5432}"
 
 "$CONTAINER_TOOL" run --name edihkal-db \
            -p "127.0.0.1:${DB_PORT}:5432" \
-           -e POSTGRES_DB=${DB_NAME} \
-           -e POSTGRES_PASSWORD=${DB_PASSWORD} \
-           -e POSTGRES_USER=${DB_USER} \
+           -e POSTGRES_DB="$DB_NAME" \
+           -e POSTGRES_PASSWORD="$DB_PASSWORD" \
+           -e POSTGRES_USER="$DB_USER" \
            -d \
            postgres:15-alpine
 
