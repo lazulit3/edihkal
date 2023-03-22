@@ -9,6 +9,7 @@ default:
   before_script:
     - rustc --version
     - cargo --version
+    - mkdir -p "$CARGO_HOME"
     - export PATH="${CARGO_HOME}/bin:${PATH}"
   cache:
     # Cache build/cargo dependencies based on Cargo.lock changes
