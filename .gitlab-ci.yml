@@ -37,19 +37,34 @@ variables:
 stages:
   - test
 
-audit-code:
+# Audit dependencies when a merge request changes Cargo.lock
+mr-audit-code:
   interruptible: true
   stage: test
   script:
     - cargo install cargo-audit
     - cargo audit
   rules:
-    # Only run for scheduled audit or when a merge request changes the lock file.
-    - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         paths:
           - "**/Cargo.lock"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+
+# Audit dependencies daily using shared CI/CD runner
+daily-audit-code:
+  interruptible: true
+  stage: test
+  script:
+    - cargo install cargo-audit
+    - cargo audit
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  # Only run on shared runners until edihkal's runner has more uptime:
+  # https://0xacab.org/lazulite/edihkal/-/issues/26
+  tags:
+    - shared
 
 format-code:
   interruptible: true
