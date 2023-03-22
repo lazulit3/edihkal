@@ -1,9 +1,9 @@
 # Only run pipelines for merge requests, scheduled pipelines, tags, and protected branches
 workflow:
   rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "schedule"
-    - if: $CI_COMMIT_REF_PROTECTED
 
 default:
   before_script:
@@ -81,9 +81,9 @@ format-code:
 
 lint-code:
   interruptible: true
-  # Only run on pushes to protected branches or tags & when a merge request changes files that Clippy is interested in (rust code, Cargo files).
+  # Only run on pushes to develop & when a merge request changes files that clippy is interested in (rust code, Cargo files).
   rules:
-    - if: $CI_COMMIT_REF_PROTECTED
+    - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         paths:
@@ -105,9 +105,9 @@ lint-code:
 
 test-code:
   interruptible: true
-  # Only on pushes to protected branches or tags & when a merge request changes file that warrant tests.
+  # Only on pushes to develop & when a merge request changes file that warrant tests.
   rules:
-    - if: $CI_COMMIT_REF_PROTECTED
+    - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         paths:
