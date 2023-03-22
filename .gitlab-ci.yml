@@ -25,7 +25,7 @@ default:
 
 variables:
   # Ensure cargo home is relative to project dir (for caching)
-  CARGO_HOME: ${CI_PROJECT_DIR}/.cargo
+  CARGO_HOME: "${CI_PROJECT_DIR}/.cargo"
   EDIHKAL_DATABASE__HOST: database
   EDIHKAL_DATABASE__PASSWORD: $POSTGRES_PASSWORD
   POSTGRES_DB: edihkal
@@ -42,7 +42,7 @@ mr-audit-code:
   interruptible: true
   stage: test
   script:
-    - curl -LsSf https://github.com/rustsec/rustsec/releases/latest/download/cargo-audit-x86_64-unknown-linux-gnu-v0.17.4.tgz | tar xzf - -C ${CARGO_HOME}/bin
+    - curl -LsSf https://github.com/rustsec/rustsec/releases/latest/download/cargo-audit-x86_64-unknown-linux-gnu-v0.17.4.tgz | tar xzf - -C ${CARGO_HOME}/bin/
     - cargo audit
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -57,7 +57,7 @@ daily-audit-code:
   interruptible: true
   stage: test
   script:
-    - curl -LsSf https://github.com/rustsec/rustsec/releases/latest/download/cargo-audit-x86_64-unknown-linux-gnu-v0.17.4.tgz | tar xzf - -C ${CARGO_HOME}/bin
+    - curl -LsSf https://github.com/rustsec/rustsec/releases/latest/download/cargo-audit-x86_64-unknown-linux-gnu-v0.17.4.tgz | tar xzf - -C ${CARGO_HOME}/bin/
     - cargo audit
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
@@ -97,7 +97,8 @@ lint-code:
     # psql required by init_db.sh to wait for DB readiness before running lints
     - apt install -y postgresql-client
     - rustup component add clippy
-    - cargo clippy -- -D warnings
+    - curl -LsSf https://github.com/taiki-e/cargo-hack/releases/latest/download/cargo-hack-x86_64-unknown-linux-gnu.tar.gz  | tar xzf - -C ${CARGO_HOME}/bin
+    - cargo hack --each-feature --exclude-no-default-features clippy -- -D warnings
   services:
     - name: postgres:15-alpine
       alias: database
@@ -121,7 +122,8 @@ test-code:
     - apt update -y
     # psql required by init_db.sh to wait for DB readiness before running tests
     - apt install -y postgresql-client
-    - cargo test --workspace
+    - curl -LsSf https://github.com/taiki-e/cargo-hack/releases/latest/download/cargo-hack-x86_64-unknown-linux-gnu.tar.gz  | tar xzf - -C ${CARGO_HOME}/bin
+    - cargo hack --each-feature --exclude-no-default-features test
   services:
     - name: postgres:15-alpine
       alias: database
