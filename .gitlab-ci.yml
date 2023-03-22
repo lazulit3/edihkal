@@ -9,7 +9,7 @@ default:
   before_script:
     - rustc --version
     - cargo --version
-    - mkdir -p "$CARGO_HOME"
+    - mkdir -p $CARGO_HOME/bin
     - export PATH="${CARGO_HOME}/bin:${PATH}"
   cache:
     # Cache build/cargo dependencies based on Cargo.lock changes
@@ -43,7 +43,7 @@ mr-audit-code:
   interruptible: true
   stage: test
   script:
-    - curl -LsSf https://github.com/rustsec/rustsec/releases/latest/download/cargo-audit-x86_64-unknown-linux-gnu-v0.17.4.tgz | tar xzf - -C ${CARGO_HOME}/bin/
+    - curl -LsSf https://github.com/rustsec/rustsec/releases/latest/download/cargo-audit-x86_64-unknown-linux-gnu-v0.17.4.tgz | tar xzf - -C $CARGO_HOME/bin/
     - cargo audit
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -58,7 +58,7 @@ daily-audit-code:
   interruptible: true
   stage: test
   script:
-    - curl -LsSf https://github.com/rustsec/rustsec/releases/latest/download/cargo-audit-x86_64-unknown-linux-gnu-v0.17.4.tgz | tar xzf - -C ${CARGO_HOME}/bin/
+    - curl -LsSf https://github.com/rustsec/rustsec/releases/latest/download/cargo-audit-x86_64-unknown-linux-gnu-v0.17.4.tgz | tar xzf - -C $CARGO_HOME/bin/
     - cargo audit
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
