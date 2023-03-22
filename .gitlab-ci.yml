@@ -1,9 +1,9 @@
 # Only run pipelines for merge requests, scheduled pipelines, tags, and protected branches
 workflow:
   rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "schedule"
-    - if: $CI_COMMIT_REF_PROTECTED
 
 default:
   before_script:
@@ -25,7 +25,7 @@ default:
 
 variables:
   # Ensure cargo home is relative to project dir (for caching)
-  CARGO_HOME: ${CI_PROJECT_DIR}/.cargo
+  CARGO_HOME: "${CI_PROJECT_DIR}/.cargo"
   EDIHKAL_DATABASE__HOST: database
   EDIHKAL_DATABASE__PASSWORD: $POSTGRES_PASSWORD
   POSTGRES_DB: edihkal
@@ -37,19 +37,34 @@ variables:
 stages:
   - test
 
-audit-code:
+# Audit dependencies when a merge request changes Cargo.lock
+mr-audit-code:
   interruptible: true
   stage: test
   script:
-    - cargo install cargo-audit
+    - curl -LsSf https://github.com/rustsec/rustsec/releases/latest/download/cargo-audit-x86_64-unknown-linux-gnu-v0.17.4.tgz | tar xzf - -C ${CARGO_HOME}/bin/
     - cargo audit
   rules:
-    # Only run for scheduled audit or when a merge request changes the lock file.
-    - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         paths:
           - "**/Cargo.lock"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+
+# Audit dependencies daily using shared CI/CD runner
+daily-audit-code:
+  interruptible: true
+  stage: test
+  script:
+    - curl -LsSf https://github.com/rustsec/rustsec/releases/latest/download/cargo-audit-x86_64-unknown-linux-gnu-v0.17.4.tgz | tar xzf - -C ${CARGO_HOME}/bin/
+    - cargo audit
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  # Only run on shared runners until edihkal's runner has more uptime:
+  # https://0xacab.org/lazulite/edihkal/-/issues/26
+  tags:
+    - shared
 
 format-code:
   interruptible: true
@@ -66,9 +81,9 @@ format-code:
 
 lint-code:
   interruptible: true
-  # Only run on pushes to protected branches or tags & when a merge request changes files that Clippy is interested in (rust code, Cargo files).
+  # Only run on pushes to develop & when a merge request changes files that clippy is interested in (rust code, Cargo files).
   rules:
-    - if: $CI_COMMIT_REF_PROTECTED
+    - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         paths:
@@ -82,16 +97,17 @@ lint-code:
     # psql required by init_db.sh to wait for DB readiness before running lints
     - apt install -y postgresql-client
     - rustup component add clippy
-    - cargo clippy -- -D warnings
+    - curl -LsSf https://github.com/taiki-e/cargo-hack/releases/latest/download/cargo-hack-x86_64-unknown-linux-gnu.tar.gz  | tar xzf - -C ${CARGO_HOME}/bin
+    - cargo hack --each-feature --exclude-no-default-features clippy -- -D warnings
   services:
     - name: postgres:15-alpine
       alias: database
 
 test-code:
   interruptible: true
-  # Only on pushes to protected branches or tags & when a merge request changes file that warrant tests.
+  # Only on pushes to develop & when a merge request changes file that warrant tests.
   rules:
-    - if: $CI_COMMIT_REF_PROTECTED
+    - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         paths:
@@ -106,7 +122,8 @@ test-code:
     - apt update -y
     # psql required by init_db.sh to wait for DB readiness before running tests
     - apt install -y postgresql-client
-    - cargo test --workspace
+    - curl -LsSf https://github.com/taiki-e/cargo-hack/releases/latest/download/cargo-hack-x86_64-unknown-linux-gnu.tar.gz  | tar xzf - -C ${CARGO_HOME}/bin
+    - cargo hack --each-feature --exclude-no-default-features test
   services:
     - name: postgres:15-alpine
       alias: database
