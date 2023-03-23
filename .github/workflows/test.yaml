@@ -1,0 +1,55 @@
+name: test
+
+on:
+  push:
+    branches: ["develop"]
+    paths:
+      - '**/Cargo.*'
+      - '**.rs'
+      - 'edihkal/configuration/*'
+      - '.env'
+  pull_request:
+    branches: ["develop"]
+    paths:
+      - '**/Cargo.*'
+      - '**.rs'
+      - 'edihkal/configuration/*'
+      - '.env'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: taiki-e/install-action@cargo-hack
+
+      - name: Run tests
+        run: cargo hack --feature-powerset test
+
+    services:
+      postgres:
+        # Match edihkal/configuration/base.yaml
+        env:
+          POSTGRES_DB: edihkal
+          POSTGRES_PASSWORD: changeme
+          POSTGRES_USER: edihkal
+
+        image: postgres
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+        ports:
+          - 5432:5432
