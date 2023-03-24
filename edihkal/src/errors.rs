@@ -13,7 +13,7 @@ impl From<DbErr> for DatabaseError {
     fn from(error: DbErr) -> Self {
         match error {
             // TODO: Behavior for other databases
-            #[cfg(feature = "sea-orm-postgres")]
+            // #[cfg(feature = "sea-orm-postgres")]
             // TODO: Check e.kind() for ErrorKind::UniqueViolation after sqlx 0.7 release:
             //       https://github.com/launchbadge/sqlx/pull/2109
             DbErr::Query(RuntimeErr::SqlxError(sqlx::Error::Database(e)))
