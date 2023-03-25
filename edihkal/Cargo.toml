@@ -11,7 +11,7 @@ axum = { version = "0.6.6", default-features = false, features = ["http1", "json
 config = { version = "0.13.3", default-features = false, features = ["yaml"] }
 edihkal_tracing = { path = "../edihkal_tracing" }
 entity = { path = "../entity" }
-migration = { path = "migration" }
+migration = { path = "migration", default-features = false }
 sea-orm = { version = "0.11", default-features = false, features = ["macros", "with-json", "with-uuid", "sqlx-postgres", "runtime-tokio-rustls"] }
 secrecy = { version = "0.8.0", features = ["serde"] }
 serde = "1.0.147"
