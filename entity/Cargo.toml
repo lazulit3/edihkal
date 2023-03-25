@@ -2,6 +2,8 @@
 name = "entity"
 version = "0.1.0"
 publish = false
+edition.license = true
+edition.license-file = true
 edition.workspace = true
 
 [dependencies]
