@@ -29,4 +29,4 @@ jobs:
       - uses: taiki-e/install-action@cargo-hack
 
       - name: Lint with clippy
-        run: cargo hack --feature-powerset clippy -- -D warnings
+        run: cargo hack --workspace --feature-powerset --exclude-no-default-features clippy -- -D warnings
