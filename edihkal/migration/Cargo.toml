@@ -2,6 +2,8 @@
 name = "migration"
 version = "0.1.0"
 publish = false
+edition.license = true
+edition.license-file = true
 edition.repository = true
 edition.workspace = true
 
