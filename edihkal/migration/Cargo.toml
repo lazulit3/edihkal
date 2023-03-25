@@ -15,7 +15,13 @@ sea-orm = { version = "0.11", features = ["macros"], default-features = false }
 
 [dependencies.sea-orm-migration]
 version = "0.11"
+default-features = false
 features = [
   "runtime-tokio-rustls",
   "sqlx-postgres",
 ]
+
+[features]
+default = ["cli"]
+# Enables `cli` feature flag for sea-orm-migration allowing use of `sea-orm-cli migrate`.
+cli = ["sea-orm-migration/cli"]
