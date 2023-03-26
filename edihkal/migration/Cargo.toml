@@ -27,3 +27,7 @@ features = [
 default = ["cli"]
 # Enables `cli` feature flag for sea-orm-migration allowing use of `sea-orm-cli migrate`.
 cli = ["sea-orm-migration/cli"]
+
+[[bin]]
+name = "migration"
+required-features = ["cli"]
