@@ -1,5 +1,5 @@
 use axum::http::StatusCode;
-use edihkal::drugs::insert_drug;
+use edihkal::{drugs::insert_drug, entity::Resource};
 use entity::{drug, Drug, NewDrug};
 use sea_orm::EntityTrait;
 use uuid::Uuid;
@@ -59,7 +59,7 @@ async fn get_drug_returns_200_and_drug() {
     let defined_drug = insert_drug(db, NewDrug::new("aporphine")).await.unwrap();
 
     // Act
-    let path = format!("/drugs/{}", defined_drug.id());
+    let path = defined_drug.location();
     let drug_response = client.get(&path).header("Accept", "application/json").send().await;
 
     // Assert
