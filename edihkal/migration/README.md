@@ -1,8 +1,13 @@
 # `migration` crate
 
+Contains database migrations managed with [SeaORM](https://www.sea-ql.org/SeaORM/).
+
+See: [Development: Adding a New Entity to the Database](docs/development.md#adding-a-new-entity-to-the-database)
+
 ## Updating `entity` after changes to `migration`
 
-Ensure localdev database container is running (`edihkal/localdev/init_db.sh`).
+Ensure that your local database container is running. See:
+[edihkal/localdev/README.md]
 
 Apply migrations to a fresh database:
 
