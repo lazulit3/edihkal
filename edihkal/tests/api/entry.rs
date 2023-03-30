@@ -8,7 +8,7 @@ use sea_orm::EntityTrait;
 use super::helpers::{http, TestService};
 
 #[tokio::test]
-async fn define_entry_returns_200_for_valid_data() {
+async fn define_entry_returns_201_for_valid_data() {
     // Arrange
     let service = TestService::new().await;
     let http_client = http::Client::new(service.service_url());
@@ -31,7 +31,7 @@ async fn define_entry_returns_200_for_valid_data() {
         .await;
 
     // Asert
-    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(response.status(), StatusCode::CREATED);
     match Entry::find().one(db).await.unwrap() {
         Some(entry) => {
             let id = entry.id();

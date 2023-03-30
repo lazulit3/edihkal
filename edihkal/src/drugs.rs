@@ -1,30 +1,42 @@
 use std::collections::HashMap;
 
+use anyhow::Context;
 use axum::{
     extract::{Path, Query, State},
-    http::{header, StatusCode},
-    response::{IntoResponse, Response},
+    response::{IntoResponse, Redirect, Response},
     Json,
 };
-use sea_orm::{prelude::*, IntoActiveModel, QueryTrait};
+use sea_orm::{prelude::*, sea_query::IntoCondition, IntoActiveModel};
 use uuid::Uuid;
 
 use entity::{drug, Drug, NewDrug};
 
-use crate::errors::DatabaseError;
+use crate::{
+    errors::{ApiError, DatabaseError},
+    query::{Filters, QueryParams},
+    resource::Resource,
+    responses::created,
+};
+
+impl QueryParams for Drug {
+    fn column(query_param: &str) -> Option<Self::Column> {
+        match query_param {
+            "name" => Some(drug::Column::Name),
+            _ => None,
+        }
+    }
+}
 
 #[tracing::instrument(skip(db))]
 pub async fn get_drug(
     State(db): State<DatabaseConnection>,
     Path(id): Path<Uuid>,
-) -> Result<Json<drug::Model>, StatusCode> {
-    let drug = select_drug(&db, id)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+) -> Result<Json<drug::Model>, ApiError> {
+    let drug = select_drug(&db, id).await.context("Failed to get drug")?;
 
     match drug {
         Some(drug) => Ok(Json(drug)),
-        _ => Err(StatusCode::NOT_FOUND),
+        _ => Err(ApiError::NotFound),
     }
 }
 
@@ -39,51 +51,50 @@ pub async fn get_drug(
 /// * `/drugs?name=methaqualone` - Get Drugs named "methaqualone"
 #[tracing::instrument(name = "Getting drugs", skip(db))]
 pub async fn get_drugs(
-    Query(params): Query<HashMap<String, String>>,
+    Query(query): Query<HashMap<String, String>>,
     State(db): State<DatabaseConnection>,
-) -> Result<Json<Vec<drug::Model>>, (StatusCode, &'static str)> {
-    let drugs = Drug::find()
-        .apply_if(params.get("name"), |query, name| {
-            query.filter(drug::Column::Name.eq(name))
-        })
-        .all(&db)
-        .await
-        .map_err(|_| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Failed to get defined drugs",
-            )
-        })?;
+) -> Result<Json<Vec<drug::Model>>, ApiError> {
+    let filter = Filters::<Drug>::from_query_string(query);
+
+    let drugs = select_drugs(&db, filter).await.context("Failed to get drugs")?;
+
     Ok(Json(drugs))
 }
 
-/// Handles requests to create a `NewDrug`.
-#[tracing::instrument(skip(db), fields(drug = drug.name))]
+/// Request handler that creates a [`Drug`] from a [`NewDrug`] request.
+///
+/// # Responses
+///
+/// * [`201 Created`](created) - [`NewDrug`] was created.
+/// * [`303 See Other`](Redirect::to) - An equivalent [`Drug`] already exists.
+///
+/// # Errors
+///
+/// * [`409 Conflict`](ApiError::Conflict) - [`NewDrug`]'s name conflicts with a different [`Drug`] that already exists.
+/// other fields differ.
+/// * [`500 Internal Server Error`](ApiError::InternalServerError) - A database error occurred.
+/// other fields differ.
+#[tracing::instrument(skip(db), fields(drug = new_drug.name))]
 pub async fn create_drug(
     State(db): State<DatabaseConnection>,
-    Json(drug): Json<NewDrug>,
-) -> Response {
-    match insert_drug(&db, drug.clone()).await {
-        Ok(drug) => (StatusCode::CREATED, Json(drug)).into_response(), // TODO
-        Err(DatabaseError::UniqueViolation) => {
-            see_other_drug_with_name(&db, &drug.name).await.into_response()
-        }
-        _ => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
-    }
-}
+    Json(new_drug): Json<NewDrug>,
+) -> Result<Response, ApiError> {
+    match insert_drug(&db, new_drug.clone()).await {
+        Ok(drug) => Ok(created(drug).into_response()),
 
-/// Returns 303 See Other redirect to Drug named `drug_name`.
-async fn see_other_drug_with_name(
-    db: &DatabaseConnection,
-    drug_name: &str,
-) -> Result<impl IntoResponse, StatusCode> {
-    match select_drug_with_name(db, drug_name).await {
-        Ok(Some(drug)) => Ok((
-            StatusCode::SEE_OTHER,
-            [(header::LOCATION, format!("/drugs/{}", drug.id()))],
-            format!("A drug with the same name ({}) already exists", drug.name()),
-        )),
-        _ => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        // Some unique field in NewDrug (e.g name) conflicted with a Drug already in the database.
+        Err(DatabaseError::UniqueViolation(_)) => {
+            // Determine whether the create request would have been idempotent (i.e. NewDrug and Drug are the same).
+            match select_new_drug(&db, new_drug)
+                .await
+                .context("Failed to determine whether NewDrug request was idempotent")?
+            {
+                // Result would have been equivalent, so response may redirect to existing resouce.
+                Some(existing_drug) => Ok(Redirect::to(&existing_drug.location()).into_response()),
+                _ => Err(ApiError::Conflict),
+            }
+        }
+        Err(DatabaseError::Unknown(err)) => Err(ApiError::InternalServerError(err)),
     }
 }
 
@@ -93,11 +104,7 @@ pub async fn insert_drug(
     db: &DatabaseConnection,
     drug: NewDrug,
 ) -> Result<drug::Model, DatabaseError> {
-    let drug = drug
-        .into_active_model()
-        .insert(db)
-        .await
-        .map_err(Into::<DatabaseError>::into)?;
+    let drug = drug.into_active_model().insert(db).await?;
     Ok(drug)
 }
 
@@ -106,15 +113,35 @@ pub async fn insert_drug(
 pub async fn select_drug(
     db: &DatabaseConnection,
     drug_id: Uuid,
-) -> Result<Option<drug::Model>, DbErr> {
-    Drug::find_by_id(drug_id).one(db).await
+) -> Result<Option<drug::Model>, DatabaseError> {
+    Ok(Drug::find_by_id(drug_id)
+        .one(db)
+        .await
+        .context("Failed to select Drug from database")?)
 }
 
-#[tracing::instrument(skip(db), fields(drug = drug_name))]
-async fn select_drug_with_name(
+/// Selects drugs matching [`condition`](fn@select_drugs#condition) from the database.
+#[tracing::instrument(skip(db))]
+pub async fn select_drugs<C>(
     db: &DatabaseConnection,
-    drug_name: &str,
-) -> Result<Option<drug::Model>, DbErr> {
-    let drug = Drug::find().filter(drug::Column::Name.eq(drug_name)).one(db).await?;
+    condition: C,
+) -> Result<Vec<drug::Model>, DatabaseError>
+where
+    C: IntoCondition + std::fmt::Debug,
+{
+    Ok(Drug::find().filter(condition).all(db).await?)
+}
+
+/// Returns some drug matching a [`NewDrug`] from the database.
+#[tracing::instrument(skip(db))]
+async fn select_new_drug(
+    db: &DatabaseConnection,
+    new_drug: NewDrug,
+) -> Result<Option<drug::Model>, DatabaseError> {
+    let drug = Drug::find()
+        .filter(new_drug)
+        .one(db)
+        .await
+        .context("Failed to select Drug with NewDrug filter from database")?;
     Ok(drug)
 }
