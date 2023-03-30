@@ -84,14 +84,15 @@ pub async fn create_drug(
 
         // Some unique field in NewDrug (e.g name) conflicted with a Drug already in the database.
         Err(DatabaseError::UniqueViolation(_)) => {
-            // Determine whether the create request would have been idempotent (i.e. NewDrug and Drug are the same).
-            match select_new_drug(&db, new_drug)
+            // Look for a Drug in database that matches the requested NewDrug
+            let same_drug_found = select_new_drug(&db, new_drug)
                 .await
-                .context("Failed to determine whether NewDrug request was idempotent")?
-            {
-                // Result would have been equivalent, so response may redirect to existing resouce.
-                Some(existing_drug) => Ok(Redirect::to(&existing_drug.location()).into_response()),
-                _ => Err(ApiError::Conflict),
+                .context("Failed to determine whether NewDrug request was idempotent")?;
+
+            if let Some(drug) = same_drug_found {
+                Ok(Redirect::to(&drug.location()).into_response())
+            } else {
+                Err(ApiError::Conflict)
             }
         }
         Err(DatabaseError::Unknown(err)) => Err(ApiError::InternalServerError(err)),
