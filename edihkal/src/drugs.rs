@@ -120,7 +120,7 @@ pub async fn select_drug(
         .context("Failed to select Drug from database")?)
 }
 
-/// Selects drugs matching [`condition`](fn@select_drugs#condition) from the database.
+/// Selects drugs matching `condition` from the database.
 #[tracing::instrument(skip(db))]
 pub async fn select_drugs<C>(
     db: &DatabaseConnection,
