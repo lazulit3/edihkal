@@ -2057,9 +2057,9 @@ dependencies = [
 
 [[package]]
 name = "sea-orm-migration"
-version = "0.11.1"
+version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e83b3786e42c62bf54196910648da81011bae8d87edb121083b92b0a5711d072"
+checksum = "edba7a6123c1035b0530deb713820688f0234431ab6c1893b14dce493ade76af"
 dependencies = [
  "async-trait",
  "clap 3.2.23",
