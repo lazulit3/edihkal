@@ -1,5 +1,13 @@
 [workspace]
-members = ["edid", "edihkal", "edihkal-client", "edihkal_tracing", "entity", "edihkal/migration"]
+members = [
+  "edid",
+  "edihkal",
+  "edihkal/migration",
+  "edihkal-client",
+  "edihkal_macros",
+  "edihkal_tracing",
+  "entity"
+]
 resolver = "2"
 
 [workspace.package]
