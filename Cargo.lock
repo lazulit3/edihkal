@@ -767,6 +767,7 @@ dependencies = [
  "once_cell",
  "reqwest",
  "sea-orm",
+ "sea_skipper",
  "secrecy",
  "serde",
  "serde_json",
@@ -792,17 +793,6 @@ dependencies = [
  "tokio",
  "tracing",
  "wiremock",
-]
-
-[[package]]
-name = "edihkal_macros"
-version = "0.1.0"
-dependencies = [
- "bae",
- "heck 0.4.1",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
 ]
 
 [[package]]
@@ -836,7 +826,7 @@ name = "entity"
 version = "0.1.0"
 dependencies = [
  "sea-orm",
- "sea_orm_new_model",
+ "sea_skipper",
  "serde",
  "uuid",
 ]
@@ -2226,12 +2216,25 @@ dependencies = [
 ]
 
 [[package]]
-name = "sea_orm_new_model"
+name = "sea_skipper"
 version = "0.1.0"
+source = "git+https://github.com/lazulit3/sea_skipper.git?rev=ec9f7fb4301afdf78d82f9365a4009e33bb45e1#ec9f7fb4301afdf78d82f9365a4009e33bb45e14"
 dependencies = [
- "edihkal_macros",
  "sea-orm",
+ "sea_skipper_macros",
  "serde",
+]
+
+[[package]]
+name = "sea_skipper_macros"
+version = "0.1.0"
+source = "git+https://github.com/lazulit3/sea_skipper.git?rev=ec9f7fb4301afdf78d82f9365a4009e33bb45e1#ec9f7fb4301afdf78d82f9365a4009e33bb45e14"
+dependencies = [
+ "bae",
+ "heck 0.4.1",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]

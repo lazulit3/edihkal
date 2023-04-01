@@ -2,9 +2,8 @@
 
 use crate::Uuid;
 
-use sea_orm_new_model::{DeriveNewModel, NewModelTrait};
-
 use sea_orm::entity::prelude::*;
+use sea_skipper::{DeriveNewModel, Location, Resource};
 use serde::{Deserialize, Serialize};
 
 #[derive(
@@ -27,5 +26,19 @@ pub enum Relation {
 impl Related<super::entry::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Entry.def()
+    }
+}
+
+// TODO: Derive this.
+impl Resource for Entity {
+    type ActiveModel = ActiveModel;
+    type Data = Model;
+    type Id = Uuid;
+}
+
+// TODO: Derive this.
+impl Location for Model {
+    fn location(&self) -> String {
+        format!("/drugs/{}", self.id)
     }
 }

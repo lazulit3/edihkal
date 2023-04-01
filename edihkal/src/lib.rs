@@ -1,8 +1,6 @@
+pub mod api;
 pub mod app;
 pub mod configuration;
-pub mod drugs;
-pub mod entries;
+pub mod db;
 pub mod errors;
-pub mod query;
-pub mod resource;
 pub mod responses;
