@@ -8,7 +8,7 @@ use axum::{
 };
 use sea_orm::{prelude::*, sea_query::IntoCondition, IntoActiveModel};
 
-use entity::{drug, Drug, NewDrug, Uuid};
+use entity::{drug, prelude::Drug, Uuid};
 
 use crate::{
     errors::{ApiError, DatabaseError},
@@ -60,33 +60,33 @@ pub async fn get_drugs(
     Ok(Json(drugs))
 }
 
-/// Request handler that creates a [`Drug`] from a [`NewDrug`] request.
+/// Request handler that creates a [`drug::Model`] from a [`drug::NewModel`] request.
 ///
 /// # Responses
 ///
-/// * [`201 Created`](created) - [`NewDrug`] was created.
-/// * [`303 See Other`](Redirect::to) - An equivalent [`Drug`] already exists.
+/// * [`201 Created`](created) - [`drug::NewModel`] was created.
+/// * [`303 See Other`](Redirect::to) - An equivalent [`drug::Model`] already exists.
 ///
 /// # Errors
 ///
-/// * [`409 Conflict`](ApiError::Conflict) - [`NewDrug`]'s name conflicts with a different [`Drug`] that already exists.
+/// * [`409 Conflict`](ApiError::Conflict) - [`drug::NewModel`]'s name conflicts with a different [`drug::Model`] that already exists.
 /// other fields differ.
 /// * [`500 Internal Server Error`](ApiError::InternalServerError) - A database error occurred.
 /// other fields differ.
 #[tracing::instrument(skip(db), fields(drug = new_drug.name))]
 pub async fn create_drug(
     State(db): State<DatabaseConnection>,
-    Json(new_drug): Json<NewDrug>,
+    Json(new_drug): Json<drug::NewModel>,
 ) -> Result<Response, ApiError> {
     match insert_drug(&db, new_drug.clone()).await {
         Ok(drug) => Ok(created(drug).into_response()),
 
-        // Some unique field in NewDrug (e.g name) conflicted with a Drug already in the database.
+        // Some unique field in drug::NewModel (e.g name) conflicted with a drug::Model already in the database.
         Err(DatabaseError::UniqueViolation(_)) => {
-            // Look for a Drug in database that matches the requested NewDrug
+            // Look for a drug::Model in database that matches the requested drug::NewModel
             let same_drug_found = select_new_drug(&db, new_drug)
                 .await
-                .context("Failed to determine whether NewDrug request was idempotent")?;
+                .context("Failed to determine whether drug::NewModel request was idempotent")?;
 
             if let Some(drug) = same_drug_found {
                 Ok(Redirect::to(&drug.location()).into_response())
@@ -102,7 +102,7 @@ pub async fn create_drug(
 #[tracing::instrument(name = "Inserting drug into database", skip(db), fields(drug = drug.name))]
 pub async fn insert_drug(
     db: &DatabaseConnection,
-    drug: NewDrug,
+    drug: drug::NewModel,
 ) -> Result<drug::Model, DatabaseError> {
     let drug = drug.into_active_model().insert(db).await?;
     Ok(drug)
@@ -132,16 +132,16 @@ where
     Ok(Drug::find().filter(condition).all(db).await?)
 }
 
-/// Returns some drug matching a [`NewDrug`] from the database.
+/// Returns some drug matching a [`drug::NewModel`] from the database.
 #[tracing::instrument(skip(db))]
 async fn select_new_drug(
     db: &DatabaseConnection,
-    new_drug: NewDrug,
+    new_drug: drug::NewModel,
 ) -> Result<Option<drug::Model>, DatabaseError> {
     let drug = Drug::find()
         .filter(new_drug)
         .one(db)
         .await
-        .context("Failed to select Drug with NewDrug filter from database")?;
+        .context("Failed to select Drug with drug::NewModel filter from database")?;
     Ok(drug)
 }

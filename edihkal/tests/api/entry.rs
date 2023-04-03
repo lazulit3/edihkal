@@ -1,5 +1,4 @@
-use edihkal_client::NewDrug;
-use entity::{Entry, NewEntry};
+use entity::{drug, entry, prelude::Entry};
 
 use axum::http::StatusCode;
 use chrono::Utc;
@@ -15,12 +14,12 @@ async fn define_entry_returns_201_for_valid_data() {
     let edihkal_client = edihkal_client::Client::new(service.service_url().to_string());
     let db = service.database_connection();
 
-    let drug = NewDrug::new("THC");
+    let drug = drug::NewModel::new("THC".to_string());
     let drug = edihkal_client.define_drug(drug).await.unwrap();
-    let drug_id = drug.id();
+    let drug_id = drug.id;
 
     let now = Utc::now().naive_utc();
-    let entry = NewEntry::new(10, *drug_id, now);
+    let entry = entry::NewModel::new(drug_id, now, 10);
 
     // Act
     let response = http_client
@@ -34,10 +33,10 @@ async fn define_entry_returns_201_for_valid_data() {
     assert_eq!(response.status(), StatusCode::CREATED);
     match Entry::find().one(db).await.unwrap() {
         Some(entry) => {
-            let id = entry.id();
+            let id = entry.id;
             assert!(!id.is_nil());
-            assert!(entry.dose() >= 0);
-            assert!(*entry.time() <= Utc::now().naive_utc());
+            assert!(entry.dose >= 0);
+            assert!(entry.time <= Utc::now().naive_utc());
         }
         None => panic!("failed to find newly recorded entry in database"),
     }

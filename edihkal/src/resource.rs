@@ -18,7 +18,7 @@ impl Resource for entity::drug::Model {
     const ROUTE: &'static str = "/drugs";
 
     fn id(&self) -> &Uuid {
-        self.id()
+        &self.id
     }
 }
 
@@ -26,6 +26,6 @@ impl Resource for entity::entry::Model {
     const ROUTE: &'static str = "/entries";
 
     fn id(&self) -> &Uuid {
-        self.id()
+        &self.id
     }
 }

@@ -1,6 +1,6 @@
 use anyhow::Context;
 use chrono::Local;
-use edihkal_client::NewEntry;
+use edihkal_client::entity::entry;
 use interim::{parse_date_string, Dialect};
 
 use crate::client;
@@ -13,7 +13,7 @@ pub async fn new_entry(dose: i32, drug_name: &str, when: &str) -> Result<(), any
     let when_utc = when.naive_utc();
 
     // Look up ID of drug in edihkal using drug_name
-    let drug_id = *client()?
+    let drug_id = client()?
         .get_drug_with_name(drug_name.to_string())
         .await
         .context(format!("Failed to lookup '{drug_name}' in edihkal"))?
@@ -22,9 +22,9 @@ pub async fn new_entry(dose: i32, drug_name: &str, when: &str) -> Result<(), any
         .context(format!(
             "'{drug_name}' not found in edihkal. Typo? Try 'edid drug define {drug_name}'?"
         ))?
-        .id();
+        .id;
 
-    let entry = NewEntry::new(dose, drug_id, when_utc);
+    let entry = entry::NewModel::new(drug_id, when_utc, dose);
     client()?
         .new_entry(entry)
         .await
