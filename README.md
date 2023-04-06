@@ -6,6 +6,6 @@
 
 Edihkal is a tool that helps data-minded (drug) users record histories of and reflect on drug use.
 
-This project is currently in an exploratory phase pursuing a **Proof of Concept** (PoC). Most planned features are not yet (or even documented) and plans are fast & loose.
+This project is currently in an exploratory phase pursuing a **Proof of Concept** (PoC). Most planned features are not yet implemented (or even documented) and plans are fast & loose.
 
 This README is sparse right now (sorry!), but if you have questions you can check out edihkal's [Frequently Asked Questions](docs/faq.md) or [start a discussion](https://github.com/lazulit3/edihkal/discussions/new?category=q-a) (if you don't find your answer there).
