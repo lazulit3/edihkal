@@ -1,9 +1,8 @@
 use axum::http::StatusCode;
 use edihkal::{drugs::insert_drug, resource::Resource};
-use entity::{drug, Drug, NewDrug};
+use entity::{drug, Drug, NewDrug, Uuid};
 use reqwest::header;
 use sea_orm::EntityTrait;
-use uuid::Uuid;
 
 use crate::helpers::define_drugs;
 

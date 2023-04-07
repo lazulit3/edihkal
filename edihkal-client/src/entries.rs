@@ -25,8 +25,7 @@ impl Client {
 mod tests {
     use chrono::Local;
     use edihkal_tracing::test_helpers::lazy_tracing;
-    use entity::{entry, NewEntry};
-    use uuid::Uuid;
+    use entity::{entry, NewEntry, Uuid};
     use wiremock::{
         matchers::{body_json, method, path},
         Mock, MockServer, ResponseTemplate,

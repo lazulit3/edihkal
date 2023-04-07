@@ -1,6 +1,6 @@
+use entity::Uuid;
 use sea_orm::{ConnectionTrait, Database, DatabaseConnection, Statement};
 use secrecy::ExposeSecret;
-use uuid::Uuid;
 
 use edihkal::{app::migrate, configuration::get_configuration};
 

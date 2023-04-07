@@ -1,7 +1,10 @@
 use sea_orm::{prelude::*, sea_query::IntoCondition, Condition, IntoSimpleExpr, Set};
 use serde::{Deserialize, Serialize};
 
-use crate::drug::{self, ActiveModel, Model};
+use crate::{
+    drug::{self, ActiveModel, Model},
+    Uuid,
+};
 
 #[async_trait::async_trait]
 impl ActiveModelBehavior for ActiveModel {
@@ -15,19 +18,6 @@ impl ActiveModelBehavior for ActiveModel {
             id: Set(Uuid::new_v4()),
             ..ActiveModelTrait::default()
         }
-    }
-
-    /// Ensure `id` is initialized before insert operations.
-    ///
-    /// This avoids mistakes where a `drug::Model` is constructed with a default `Uuid` and then converted into an `ActiveModel`.
-    async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
-    where
-        C: ConnectionTrait,
-    {
-        if insert && (self.id.is_not_set() || self.id.as_ref().is_nil()) {
-            self.id = Set(Uuid::new_v4());
-        }
-        Ok(self)
     }
 }
 
