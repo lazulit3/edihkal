@@ -7,9 +7,8 @@ use axum::{
     Json,
 };
 use sea_orm::{prelude::*, sea_query::IntoCondition, IntoActiveModel};
-use uuid::Uuid;
 
-use entity::{drug, Drug, NewDrug};
+use entity::{drug, Drug, NewDrug, Uuid};
 
 use crate::{
     errors::{ApiError, DatabaseError},

@@ -1,5 +1,5 @@
+use entity::Uuid;
 use sea_orm::ModelTrait;
-use uuid::Uuid;
 
 /// Trait describing a [data model](ModelTrait) as an API [`Resource`].
 pub trait Resource: ModelTrait {
