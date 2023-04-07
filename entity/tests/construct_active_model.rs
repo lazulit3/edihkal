@@ -1,4 +1,7 @@
-use entity::{drug::ActiveModel, NewDrug};
+use entity::{
+    drug::{self, ActiveModel},
+    NewDrug,
+};
 /// Tests around different ways to construct an ActiveModel.
 use sea_orm::{ActiveModelBehavior, IntoActiveModel, Set};
 
@@ -19,8 +22,6 @@ fn new_drug_into_active_model_has_expected_values() {
 }
 
 /// An `ActiveModel` constructed with `ActiveModel`'s `Default::default()` has expected values.
-///
-/// Converting `NewDrug` may be preferred, but this is works.
 #[test]
 fn active_model_with_default_id_has_expected_values() {
     let active_model = ActiveModel {
@@ -35,8 +36,6 @@ fn active_model_with_default_id_has_expected_values() {
 }
 
 /// An `ActiveModel` constructed with `ActiveModelBehavior::new()` has expected values.
-///
-/// Converting `NewDrug` may be preferred, but this is works.
 #[test]
 fn active_model_new_has_expected_values() {
     let mut active_model = ActiveModel::new();
@@ -47,3 +46,24 @@ fn active_model_new_has_expected_values() {
     assert!(active_model.name.is_set());
     assert_eq!(active_model.name.as_ref(), "Cannabis");
 }
+
+/* TODO: Eenable after making Model's fields public again (planned change).
+ *
+/// A `drug::Model` with a `default()` `Uuid` converted into an `ActiveModel` has an initialized id.
+///
+/// Verifies that the [`entity::Uuid`] newtype's [`Default`][entity::Uuid::default()]} implementation returns
+/// an initialized value (in contrast to [`uuid::Uuid`]`}).
+#[test]
+fn model_with_default_id_into_active_model_has_initialized_uuid() {
+    let drug_model = drug::Model {
+        id: Default::default(),
+        name: "Dextrometorphan".to_owned(),
+    };
+    let active_model = drug_model.into_active_model();
+
+    assert!(active_model.id.is_set());
+    assert!(!active_model.id.as_ref().is_nil());
+    assert!(active_model.name.is_set());
+    assert_eq!(active_model.name.as_ref(), "Cannabis");
+}
+*/
