@@ -23,6 +23,7 @@ async fn define_drug_returns_201_for_valid_data() {
         .send()
         .await;
 
+    // Assert
     assert_eq!(response.status(), StatusCode::CREATED);
 
     match Drug::find().one(db).await.unwrap() {
@@ -30,6 +31,10 @@ async fn define_drug_returns_201_for_valid_data() {
             let id = drug.id();
             assert!(!id.is_nil());
             assert_eq!(drug.name, "caffeine");
+            assert_eq!(
+                response.headers().get("Location").unwrap().to_str().unwrap(),
+                format!("/drugs/{}", id)
+            );
         }
         None => panic!("failed to find newly defined drug in database"),
     }
