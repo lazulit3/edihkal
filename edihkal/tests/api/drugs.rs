@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use edihkal::{drugs::insert_drug, resource::Resource};
-use entity::{drug, Drug, NewDrug, Uuid};
+use entity::{drug, prelude::Drug, Uuid};
 use reqwest::header;
 use sea_orm::EntityTrait;
 
@@ -14,7 +14,7 @@ async fn define_drug_returns_201_for_valid_data() {
     let client = http::Client::new(service.service_url());
     let db = service.database_connection();
 
-    let drug = NewDrug::new("caffeine");
+    let drug = drug::NewModel::new("caffeine".to_string());
 
     let response = client
         .post("/drugs")
@@ -29,7 +29,7 @@ async fn define_drug_returns_201_for_valid_data() {
         Some(drug) => {
             let id = drug.id();
             assert!(!id.is_nil());
-            assert_eq!(drug.name(), "caffeine");
+            assert_eq!(drug.name, "caffeine");
         }
         None => panic!("failed to find newly defined drug in database"),
     }
@@ -56,7 +56,9 @@ async fn get_drug_returns_200_and_drug() {
     let db = service.database_connection();
     let client = http::Client::new(service.service_url());
 
-    let defined_drug = insert_drug(db, NewDrug::new("aporphine")).await.unwrap();
+    let defined_drug = insert_drug(db, drug::NewModel::new("aporphine".to_string()))
+        .await
+        .unwrap();
 
     // Act
     let path = defined_drug.location();
@@ -65,7 +67,7 @@ async fn get_drug_returns_200_and_drug() {
     // Assert
     assert_eq!(drug_response.status(), StatusCode::OK);
     let drug: drug::Model = drug_response.json().await;
-    assert_eq!(drug.name(), defined_drug.name());
+    assert_eq!(drug.name, defined_drug.name);
     assert_eq!(drug.id(), defined_drug.id());
 }
 
@@ -112,7 +114,7 @@ async fn get_drugs_returns_list_of_drugs() {
 
     // Each drug should have a name from `drug_names` and a non-nil `Uuid`
     for drug in drugs {
-        assert!(defined_drug_names.contains(&drug.name()));
+        assert!(defined_drug_names.contains(&drug.name.as_ref()));
         assert!(!drug.id().is_nil());
     }
 }
@@ -143,7 +145,7 @@ async fn get_drugs_filters_by_name() {
 
     // edihkal should return only one drug named "salvia" with a non-nil `Uuid`
     assert_eq!(1, drugs.len());
-    assert_eq!(drugs[0].name(), "salvia");
+    assert_eq!(drugs[0].name, "salvia");
     assert!(!drugs[0].id().is_nil());
 }
 
@@ -155,7 +157,7 @@ async fn see_other_drug_if_new_drug_already_exists() {
     let edihkal_client = edihkal_client::Client::new(service.service_url().to_string());
     let http_client = http::Client::new(service.service_url());
 
-    let drug = NewDrug::new("Lisdexamfetamine");
+    let drug = drug::NewModel::new("Lisdexamfetamine".to_string());
     let defined_drug = edihkal_client.define_drug(drug.clone()).await.unwrap();
     let drug_id = defined_drug.id();
 

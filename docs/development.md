@@ -45,8 +45,14 @@ sea-orm-cli migrate fresh
 
 Now generate/update SeaORM entities for the [`entity`](/entity/) crate (see SeaORM's [Generating Entity Files](https://www.sea-ql.org/SeaORM/docs/generate-entity/sea-orm-cli/#generating-entity-files)):
 
-``` sh
-sea-orm-cli generate entity --lib -o entity/src/ --with-serde both
+```sh
+# build/generate-entity-from-db-schema.sh
+
+sea-orm-cli generate entity \
+    --lib \
+    --model-extra-derives 'edihkal_macros::DeriveNewModel' \
+    --output-dir entity/src/ \
+    --with-serde both
 ```
 
 Due to some manual modifications made on top of the generated code (https://github.com/lazulit3/edihkal/issues/29), there will be some conflicts to resolve.

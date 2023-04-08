@@ -1,22 +1,20 @@
-use entity::entry::Model as Entry;
-use entity::NewEntry;
-
 use crate::{
     edihkal::{Client, Payloads},
+    entity::entry,
     errors::Error,
 };
 
 pub(crate) struct NewEntryEndpoint;
 
 impl Payloads for NewEntryEndpoint {
-    type Request = NewEntry;
-    type Response = Entry;
+    type Request = entry::NewModel;
+    type Response = entry::Model;
 }
 
 impl Client {
     /// Record a new journal entry in edihkal.
     #[tracing::instrument(level = "debug", skip(self))]
-    pub async fn new_entry(&self, entry: NewEntry) -> Result<Entry, Error> {
+    pub async fn new_entry(&self, entry: entry::NewModel) -> Result<entry::Model, Error> {
         self.post::<NewEntryEndpoint>("/entries", entry).await
     }
 }
@@ -25,7 +23,7 @@ impl Client {
 mod tests {
     use chrono::Local;
     use edihkal_tracing::test_helpers::lazy_tracing;
-    use entity::{entry, NewEntry, Uuid};
+    use entity::{entry, Uuid};
     use wiremock::{
         matchers::{body_json, method, path},
         Mock, MockServer, ResponseTemplate,
@@ -44,12 +42,16 @@ mod tests {
 
         let dose = 3;
         let drug_id = Uuid::new_v4();
-        let now = Local::now().naive_local();
-        // TODO: NewEntry should take a reference to a drug, not just the ID.
+        let time = Local::now().naive_local();
         // TODO: Units of measurement!
-        let new_entry = NewEntry::new(dose, drug_id, now);
+        let new_entry = entry::NewModel::new(drug_id, time, dose);
+        let response_body = entry::Model {
+            id: Uuid::new_v4(),
+            dose,
+            drug_id,
+            time,
+        };
 
-        let response_body = entry::Model::from(new_entry.clone());
         Mock::given(method("POST"))
             .and(path("/entries"))
             .and(body_json(&new_entry))

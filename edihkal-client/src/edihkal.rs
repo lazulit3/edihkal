@@ -106,7 +106,7 @@ mod tests {
 
     use edihkal_tracing::test_helpers::lazy_tracing;
 
-    use entity::{drug, NewDrug};
+    use entity::{drug, Uuid};
     use wiremock::{
         matchers::{body_json, header, method, path},
         Mock, MockServer, ResponseTemplate,
@@ -126,8 +126,14 @@ mod tests {
         let client = Client::new(mock_uri);
 
         let response_body = vec![
-            drug::Model::new("lysergic acid diethylamide"),
-            drug::Model::new("3,4-methylenedioxy-methamphetamine"),
+            drug::Model {
+                id: Uuid::new_v4(),
+                name: "lysergic acid diethylamide".to_string(),
+            },
+            drug::Model {
+                id: Uuid::new_v4(),
+                name: "3,4-methylenedioxy-methamphetamine".to_string(),
+            },
         ];
 
         Mock::given(method("GET"))
@@ -154,8 +160,11 @@ mod tests {
         let mock_uri = mock_server.uri();
         let client = Client::new(mock_uri);
 
-        let request_body = NewDrug::new("iboga");
-        let response_body = drug::Model::new("iboga");
+        let request_body = drug::NewModel::new("iboga".to_string());
+        let response_body = drug::Model {
+            id: Uuid::new_v4(),
+            name: "iboga".to_string(),
+        };
 
         Mock::given(method("POST"))
             .and(path("/drugs"))

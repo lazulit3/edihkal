@@ -2,7 +2,7 @@ use anyhow::Context;
 use axum::{extract::State, response::IntoResponse, Json};
 use sea_orm::{ActiveModelTrait, DatabaseConnection, IntoActiveModel};
 
-use entity::{entry, NewEntry};
+use entity::entry;
 
 use crate::{
     errors::{ApiError, DatabaseError},
@@ -13,7 +13,7 @@ use crate::{
 #[tracing::instrument(skip(db))]
 pub async fn create_entry(
     State(db): State<DatabaseConnection>,
-    Json(entry): Json<NewEntry>,
+    Json(entry): Json<entry::NewModel>,
 ) -> Result<impl IntoResponse, ApiError> {
     let entry = insert_entry(&db, entry).await.context("Failed to create NewEntry")?;
     Ok(created(entry))
@@ -23,7 +23,7 @@ pub async fn create_entry(
 #[tracing::instrument(name = "Inserting entry into database", skip(db))]
 pub async fn insert_entry(
     db: &DatabaseConnection,
-    entry: NewEntry,
+    entry: entry::NewModel,
 ) -> Result<entry::Model, DatabaseError> {
     let entry = entry
         .into_active_model()

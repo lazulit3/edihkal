@@ -1,7 +1,5 @@
-use entity::{
-    drug::{self, ActiveModel},
-    NewDrug,
-};
+use entity::drug::{ActiveModel, NewModel};
+
 /// Tests around different ways to construct an ActiveModel.
 use sea_orm::{ActiveModelBehavior, IntoActiveModel, Set};
 
@@ -10,7 +8,7 @@ use sea_orm::{ActiveModelBehavior, IntoActiveModel, Set};
 /// This is the preferred approach to get an `ActiveModel` from a new drug request.
 #[test]
 fn new_drug_into_active_model_has_expected_values() {
-    let new_drug = NewDrug {
+    let new_drug = NewModel {
         name: "Alcohol".to_owned(),
     };
     let active_model = new_drug.into_active_model();

@@ -795,6 +795,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "edihkal_macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.10",
+]
+
+[[package]]
 name = "edihkal_tracing"
 version = "0.1.0"
 dependencies = [
@@ -824,6 +833,7 @@ dependencies = [
 name = "entity"
 version = "0.1.0"
 dependencies = [
+ "edihkal_macros",
  "sea-orm",
  "serde",
  "uuid",
