@@ -2225,6 +2225,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "seaxum"
+version = "0.1.0"
+dependencies = [
+ "sea-orm",
+]
+
+[[package]]
 name = "secrecy"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
