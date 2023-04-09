@@ -2229,6 +2229,7 @@ name = "seaxum"
 version = "0.1.0"
 dependencies = [
  "sea-orm",
+ "seaxum",
 ]
 
 [[package]]

@@ -8,3 +8,10 @@ edition.workspace = true
 
 [dependencies]
 sea-orm = { version = "0.11", default-features = false }
+
+[dev-dependencies]
+seaxum = { path = ".", features = ["tests-cfg"] }
+
+[features]
+default = []
+tests-cfg = ["sea-orm/macros", "sea-orm/tests-cfg"]
