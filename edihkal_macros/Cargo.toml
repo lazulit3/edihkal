@@ -11,6 +11,7 @@ edition.workspace = true
 proc-macro = true
 
 [dependencies]
+bae = { version = "0.1", default-features = false }
 proc-macro2 = { version = "1", default-features = false }
 quote = { version = "1", default-features = false }
-syn = { version = "2", default-features = false, features = ["parsing", "proc-macro", "derive", "printing"] }
+syn = { version = "1", default-features = false, features = ["parsing", "proc-macro", "derive", "printing"] }

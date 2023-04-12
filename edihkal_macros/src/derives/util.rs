@@ -3,7 +3,8 @@ use syn::{punctuated::Punctuated, token::Comma, Field, Meta};
 /// Returns true if field does not have attribute `#[sea_orm(primary_key)]`.
 pub(crate) fn field_not_primary_key(field: &Field) -> bool {
     for attr in field.attrs.iter() {
-        if let Some(ident) = attr.path().get_ident() {
+        // Skip this attr if it's not a sea_orm attribute.
+        if let Some(ident) = attr.path.get_ident() {
             if ident != "sea_orm" {
                 continue;
             }

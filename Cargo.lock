@@ -798,9 +798,10 @@ dependencies = [
 name = "edihkal_macros"
 version = "0.1.0"
 dependencies = [
+ "bae",
  "proc-macro2",
  "quote",
- "syn 2.0.15",
+ "syn 1.0.109",
 ]
 
 [[package]]
