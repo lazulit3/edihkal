@@ -2,7 +2,7 @@ use sea_orm::{prelude::*, Condition, IntoActiveModel};
 use std::fmt::Debug;
 
 #[cfg(feature = "derive")]
-pub use edihkal_macros::DeriveNewModel;
+pub use edihkal_macros::{DeriveNewModel, DeriveNewModelTrait};
 
 #[async_trait::async_trait]
 pub trait NewModelTrait: Clone + Send + Debug + IntoActiveModel<Self::ActiveModel> {

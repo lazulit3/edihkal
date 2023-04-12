@@ -3,17 +3,12 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use sea_orm_new_model::{DeriveNewModel, NewModelTrait};
+
 use crate::Uuid;
 
 #[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    DeriveEntityModel,
-    Eq,
-    Serialize,
-    Deserialize,
-    edihkal_macros :: DeriveNewModel,
+    Clone, Debug, PartialEq, DeriveEntityModel, DeriveNewModel, Eq, Serialize, Deserialize,
 )]
 #[sea_orm(table_name = "entry")]
 pub struct Model {

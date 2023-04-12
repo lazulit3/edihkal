@@ -835,8 +835,8 @@ dependencies = [
 name = "entity"
 version = "0.1.0"
 dependencies = [
- "edihkal_macros",
  "sea-orm",
+ "sea_orm_new_model",
  "serde",
  "uuid",
 ]
