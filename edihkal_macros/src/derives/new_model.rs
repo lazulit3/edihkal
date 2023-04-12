@@ -7,13 +7,14 @@ enum Error {
     InputNotStruct,
 }
 
-struct NewModel {
+struct DeriveNewModel {
     field_idents: Vec<syn::Ident>,
     field_types: Vec<syn::Type>,
 }
 
-impl NewModel {
+impl DeriveNewModel {
     fn new(input: syn::DeriveInput) -> Result<Self, Error> {
+        // Extract named fields from the struct.
         let fields = match input.data {
             syn::Data::Struct(syn::DataStruct {
                 fields: syn::Fields::Named(syn::FieldsNamed { named, .. }),
@@ -30,7 +31,7 @@ impl NewModel {
             .map(|field| (field.ident.as_ref().unwrap().clone(), field.ty))
             .unzip();
 
-        Ok(NewModel {
+        Ok(DeriveNewModel {
             field_idents,
             field_types,
         })
@@ -68,7 +69,7 @@ impl NewModel {
 pub fn expand_derive_new_model(input: syn::DeriveInput) -> syn::Result<TokenStream> {
     let ident_span = input.ident.span();
 
-    match NewModel::new(input) {
+    match DeriveNewModel::new(input) {
         Ok(new_model) => new_model.expand(),
         Err(Error::InputNotStruct) => Ok(quote_spanned! {
             ident_span => compile_error!("you can only derive DeriveNewModel on structs");
