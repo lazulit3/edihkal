@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use quote::{quote, quote_spanned};
 
-use crate::util::field_not_primary_key;
+use super::util::field_not_primary_key;
 
 enum Error {
     InputNotStruct,

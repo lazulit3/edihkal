@@ -4,7 +4,6 @@ use proc_macro::TokenStream;
 use syn::{parse_macro_input, DeriveInput, Error};
 
 mod derives;
-mod util;
 
 /// The DeriveNewModel derive macro will derive a corresponding `NewModel` from a `Model` excluding the model's primary key.
 ///
