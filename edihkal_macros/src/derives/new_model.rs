@@ -43,6 +43,7 @@ impl DeriveNewModel {
             field_types,
         } = self;
 
+        // TODO: Gate serde Serialize & Deserialize with feature flag.
         Ok(quote!(
             #[automatically_derived]
             #[derive(Clone, Debug, PartialEq, Eq, DeriveIntoActiveModel, Serialize, Deserialize)]
@@ -53,6 +54,7 @@ impl DeriveNewModel {
                 )*
             }
 
+            #[automatically_derived]
             impl NewModel {
                 pub fn new(#(#field_idents: #field_types,)*) -> Self {
                     Self {
@@ -65,7 +67,6 @@ impl DeriveNewModel {
 }
 
 /// Method to derive a `NewModel` from a `Model` definition.
-// pub fn expand_derive_new_model(ident: Ident, data: Data) -> syn::Result<TokenStream> {
 pub fn expand_derive_new_model(input: syn::DeriveInput) -> syn::Result<TokenStream> {
     let ident_span = input.ident.span();
 

@@ -799,6 +799,7 @@ name = "edihkal_macros"
 version = "0.1.0"
 dependencies = [
  "bae",
+ "heck 0.4.1",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
