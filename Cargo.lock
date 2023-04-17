@@ -2231,6 +2231,7 @@ version = "0.1.0"
 dependencies = [
  "edihkal_macros",
  "sea-orm",
+ "serde",
 ]
 
 [[package]]

@@ -11,6 +11,10 @@ edition.workspace = true
 edihkal_macros = { version = "0.1", path = "../edihkal_macros", optional = true }
 sea-orm = { version = "0.11", default-features = false }
 
+[dev-dependencies]
+sea-orm = { version = "0.11", features = ["macros"], default-features = false }
+serde = { version = "1", features = ["derive"] }
+
 [features]
 default = [ "derive", "with-serde" ]
 
