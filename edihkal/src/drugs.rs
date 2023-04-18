@@ -8,7 +8,11 @@ use axum::{
 };
 use sea_orm::{prelude::*, sea_query::IntoCondition, IntoActiveModel};
 
-use entity::{drug, prelude::Drug, Uuid};
+use entity::{
+    drug,
+    prelude::{Drug, NewModelTrait},
+    Uuid,
+};
 
 use crate::{
     errors::{ApiError, DatabaseError},
@@ -139,7 +143,7 @@ async fn select_new_drug(
     new_drug: drug::NewModel,
 ) -> Result<Option<drug::Model>, DatabaseError> {
     let drug = Drug::find()
-        .filter(new_drug)
+        .filter(new_drug.as_filter_all())
         .one(db)
         .await
         .context("Failed to select Drug with drug::NewModel filter from database")?;
