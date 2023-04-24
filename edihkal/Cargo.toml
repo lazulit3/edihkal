@@ -9,7 +9,7 @@ edition.workspace = true
 
 [dependencies]
 anyhow = "1.0.65"
-axum = { version = "0.6.15", default-features = false, features = ["http1", "json", "query", "tokio"] }
+axum = { version = "0.6.16", default-features = false, features = ["http1", "json", "query", "tokio"] }
 config = { version = "0.13.3", default-features = false, features = ["yaml"] }
 edihkal_tracing = { path = "../edihkal_tracing" }
 entity = { path = "../entity" }
