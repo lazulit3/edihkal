@@ -16,7 +16,7 @@ DB_NAME="${POSTGRES_DB:=edihkal}"
 DB_HOST="${POSTGRES_HOST:=127.0.0.1}"
 DB_PORT="${POSTGRES_PORT:=5432}"
 
-"$CONTAINER_TOOL" run --name edihkal-db \
+"$CONTAINER_TOOL" run --name "$DB_NAME" \
            -p "127.0.0.1:${DB_PORT}:5432" \
            -e POSTGRES_DB="$DB_NAME" \
            -e POSTGRES_PASSWORD="$DB_PASSWORD" \
