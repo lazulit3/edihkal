@@ -29,16 +29,11 @@ pub async fn get_by_id<R: Resource>(
     }
 }
 
-// TODO: Update outdated docs.
-// Responds with a JSON list of drugs matching the query.
-//
-// # Query Filters
-// Query filters may be used to limit results to matching values.
-//
-// * `/drugs` - Get all drugs (no filters)
-// * `/drugs?name=methaqualone` - Get Drugs named "methaqualone"
+/// Responds with a collection of some [`Resource`] filtered with a query string.
+///
+/// The request's query string filters on exact values. Supported query parameters for filtering
+/// are defined by the [`QueryParams`] implementation.
 #[tracing::instrument(skip(db))]
-// pub async fn get_collection_with_filter<R: Resourcl, P: QueryParams<Entity = R>>(
 pub async fn get_collection_with_filter<R: Resource, P: QueryParams>(
     Query(query): Query<HashMap<String, String>>,
     State(db): State<DatabaseConnection>,
