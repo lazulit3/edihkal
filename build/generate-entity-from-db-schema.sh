@@ -4,7 +4,7 @@ set -e
 
 sea-orm-cli generate entity \
     --lib \
-    --model-extra-derives 'edihkal_macros::DeriveNewModel' \
+    --model-extra-derives 'sea_skipper::DeriveNewModel' \
     --output-dir entity/src/ \
     --with-serde both \
     "$@"

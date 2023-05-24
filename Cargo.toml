@@ -4,10 +4,8 @@ members = [
   "edihkal",
   "edihkal/migration",
   "edihkal-client",
-  "edihkal_macros",
   "edihkal_tracing",
   "entity",
-  "sea_orm_new_model",
 ]
 resolver = "2"
 

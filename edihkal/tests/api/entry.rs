@@ -37,6 +37,10 @@ async fn define_entry_returns_201_for_valid_data() {
             assert!(!id.is_nil());
             assert!(entry.dose >= 0);
             assert!(entry.time <= Utc::now().naive_utc());
+            assert_eq!(
+                response.headers().get("Location").unwrap().to_str().unwrap(),
+                format!("/entries/{}", id)
+            );
         }
         None => panic!("failed to find newly recorded entry in database"),
     }

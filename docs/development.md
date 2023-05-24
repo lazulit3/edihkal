@@ -1,4 +1,4 @@
-# Development 
+# Development
 
 ## Backend Development
 
@@ -50,7 +50,7 @@ Now generate/update SeaORM entities for the [`entity`](/entity/) crate (see SeaO
 
 sea-orm-cli generate entity \
     --lib \
-    --model-extra-derives 'edihkal_macros::DeriveNewModel' \
+    --model-extra-derives 'sea_skipper::DeriveNewModel' \
     --output-dir entity/src/ \
     --with-serde both
 ```

@@ -3,14 +3,13 @@ use axum::{
     response::IntoResponse,
     Json,
 };
+use sea_skipper::Location;
 use serde::Serialize;
-
-use crate::resource::Resource;
 
 /// Returns a response indicating that a [`Resource`] was successfully created.
 pub fn created<R>(resource: R) -> impl IntoResponse
 where
-    R: Resource + Serialize,
+    R: Serialize + Location,
 {
     (
         StatusCode::CREATED,

@@ -7,17 +7,24 @@ use axum::{
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use secrecy::ExposeSecret;
 use tower::ServiceBuilder;
-use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse};
-use tower_http::ServiceBuilderExt;
-use tower_http::{request_id::MakeRequestUuid, trace::TraceLayer};
+use tower_http::{
+    request_id::MakeRequestUuid,
+    trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer},
+    ServiceBuilderExt,
+};
 
+use entity::{
+    drug, entry,
+    prelude::{Drug, Entry},
+};
 use migration::{Migrator, MigratorTrait};
 
-use crate::drugs::get_drug;
 use crate::{
+    api::{
+        handlers::{create, delete, get_by_id, get_collection_with_filter},
+        query_params,
+    },
     configuration::{DatabaseSettings, Settings},
-    drugs::{create_drug, get_drugs},
-    entries::create_entry,
 };
 
 pub async fn app(configuration: &Settings) -> Result<Router> {
@@ -30,9 +37,13 @@ pub async fn app(configuration: &Settings) -> Result<Router> {
 pub fn router(db: DatabaseConnection) -> Router {
     Router::new()
         .route("/health_check", get(|| async { StatusCode::OK }))
-        .route("/drugs", get(get_drugs).post(create_drug))
-        .route("/drugs/:id", get(get_drug))
-        .route("/entries", post(create_entry))
+        .route(
+            "/drugs",
+            get(get_collection_with_filter::<Drug, query_params::Drug>)
+                .post(create::<Drug, drug::NewModel>),
+        )
+        .route("/drugs/:id", get(get_by_id::<Drug>).delete(delete::<Drug>))
+        .route("/entries", post(create::<Entry, entry::NewModel>))
         .layer(
             ServiceBuilder::new()
                 .set_x_request_id(MakeRequestUuid)
