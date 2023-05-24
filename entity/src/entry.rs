@@ -36,14 +36,18 @@ impl Related<super::drug::Entity> for Entity {
     }
 }
 
-// TODO: Derive this.
+// TODO: It's not ideal to implement these manually here because this is generated code.
+// This could be derived.
 impl Resource for Entity {
     type ActiveModel = ActiveModel;
     type Data = Model;
     type Id = Uuid;
 }
 
-// TODO: Derive this.
+// TODO: It's not ideal to implement these manually here because this is generated code.
+// This could be derived here, or it may make more sense for `entity` to become a sub-module of
+// `edihkal` since that's where the route is defined. (But that has other considerations for model
+// definitions / dependencies for other crates e.g. `edihkal-client`.)
 impl Location for Model {
     fn location(&self) -> String {
         format!("/entries/{}", self.id)
