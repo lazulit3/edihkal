@@ -5,6 +5,7 @@ use secrecy::{ExposeSecret, Secret};
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
+    pub tls: TlsSettings,
 }
 
 #[derive(serde::Deserialize)]
@@ -20,6 +21,15 @@ pub struct DatabaseSettings {
     pub port: u16,
     pub host: String,
     pub database_name: String,
+}
+
+/// Settings for configuring TLS (for HTTPS).
+#[derive(serde::Deserialize)]
+pub struct TlsSettings {
+    /// Path to PEM-formatted certificate file.
+    pub certificate: String,
+    /// Path to PEM-formatted key file.
+    pub key: String,
 }
 
 impl ApplicationSettings {
