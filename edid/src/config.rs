@@ -13,7 +13,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Config {
         Config {
-            edihkal_url: "http://localhost:8080".to_string(),
+            edihkal_url: "https://localhost:8443".to_string(),
         }
     }
 }
