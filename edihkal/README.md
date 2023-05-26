@@ -2,15 +2,6 @@
 
 `edihkal` contains edihkal's API service.
 
-To run `edihkal` with the default configuration for local development:
+## Local Development
 
-```
-cargo run
-```
-
-`edihkal` outputs tracing logs formatted for `bunyan`.
-It's recommended to pipe output to `bunyan` for prettier output:
-
-```
-cargo run | bunyan
-```
+See [`localdev/`](localdev/) for notes on setting up a local development environment.

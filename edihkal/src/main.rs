@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use axum::Server;
+use axum_server::tls_rustls::RustlsConfig;
 use edihkal_tracing::configure_tracing;
 use std::net::SocketAddr;
 
@@ -13,7 +13,11 @@ async fn main() -> Result<()> {
         .parse()
         .context("Failed to parse service host and port into socket address")?;
 
-    Server::bind(&addr)
+    let tls_config = RustlsConfig::from_pem_file(&config.tls.certificate, &config.tls.key)
+        .await
+        .context("Failed to configure rustls using configured certificate and key")?;
+
+    axum_server::bind_rustls(addr, tls_config)
         .serve(app(&config).await?.into_make_service())
         .await?;
     Ok(())
