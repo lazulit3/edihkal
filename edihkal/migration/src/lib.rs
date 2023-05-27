@@ -2,6 +2,7 @@ pub use sea_orm_migration::prelude::*;
 
 mod m20220101_000001_create_drug_table;
 mod m20221124_233148_create_entry_table;
+mod m20230527_181001_create_user_table;
 
 pub struct Migrator;
 
@@ -11,6 +12,7 @@ impl MigratorTrait for Migrator {
         vec![
             Box::new(m20220101_000001_create_drug_table::Migration),
             Box::new(m20221124_233148_create_entry_table::Migration),
+            Box::new(m20230527_181001_create_user_table::Migration),
         ]
     }
 }
