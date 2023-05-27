@@ -1,4 +1,6 @@
 /*!
+// TODO: These docs are out of date. (e.g. DeriveNewModel location, but probably many things.)
+
 The `entity` crate provides data model types and APIs for working with edihkal's database using `sea-orm`.
 
 `entity` contains modules that represent database entities corresponding to tables in the database.
