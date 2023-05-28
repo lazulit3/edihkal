@@ -1,0 +1,39 @@
+FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
+WORKDIR /app
+
+
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json --bin edihkal
+
+
+FROM chef as builder
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --recipe-path recipe.json --bin edihkal
+COPY . .
+RUN cargo build --bin edihkal
+
+
+FROM chef as bunyan
+RUN cargo install bunyan
+
+
+FROM debian:bullseye-slim AS runtime
+WORKDIR /app
+
+LABEL org.opencontainers.image.authors="lazulit3 <lazulit3@riseup.net>" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.title="edihkal" \
+      org.opencontainers.image.url="https://github.com/lazulit3/edihkal"
+
+RUN groupadd -r edihkal && useradd -r -g edihkal edihkal
+USER edihkal
+
+COPY --from=bunyan /usr/local/cargo/bin/bunyan /usr/local/bin/bunyan
+
+COPY --from=builder /app/target/debug/edihkal edihkal
+COPY edihkal/configuration configuration
+ENV EDIHKAL_ENVIRONMENT localdev
+
+ENTRYPOINT ["sh", "-c", "--"]
+CMD ["./edihkal | bunyan"]

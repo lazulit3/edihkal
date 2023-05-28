@@ -1,6 +1,9 @@
+docker-compose.yml
+edihkal/docker
+edihkal/localdev
 target
-Dockerfile
 .dockerignore
+.DS_Store
 .env
 .git
 .gitignore

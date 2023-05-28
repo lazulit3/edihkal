@@ -1,59 +1,54 @@
 # Local Development
 
-## Quick Start
+This document explains how to run `edihkal` for local development on your workstation.
+
+## Getting Started
+
+### Quick Start
+
+Here's a summary of the process (described in more detail below). Run these commands at the top of the edihkal workspace:
 
 ```sh
-./init_db.sh
+mkcert \
+  --key-file edihkal/localdev/self-signed-certs/key.pem \
+  --cert-file edihkal/localdev/self-signed-certs/cert.pem \
+  localhost 127.0.0.1 ::1
 
-mkcert --key-file self-signed-certs/key.pem \
-       --cert-file self-signed-certs/cert.pem \
-       localhost 127.0.0.1 ::1
-
-cd ..
-cargo run | bunyan
+docker-compose up
 ```
 
-## Setup
+### Generate Self-Signed Certificates for TLS
 
-### Self-Signed Certificates for TLS
+`edihkal` requires a certificate & key to secure traffic with TLS / HTTPS.
 
-`edihkal` requires a certificate & key for TLS / HTTPS. This can be generated using `mkcert`:
+These can be generated using [`mkcert`](https://github.com/FiloSottile/mkcert):
 
 ```sh
 mkcert --key-file self-signed-certs/key.pem \
-       --cert-file self-signed-certs/cert.pem \
-       localhost 127.0.0.1 ::1
+--cert-file self-signed-certs/cert.pem \
+localhost 127.0.0.1 ::1
 ```
 
 See [`self-signed-certs/`](self-signed-certs/) for details.
 
-### Database
+### Using `docker-compose.yml`
 
-`edihkal` requires a database service (currently Postgres) to run.
-
-### Manage LocalDev DB Container Using `init_db.sh`
-
-`init_db.sh` can be run to setup a database container for edihkal for local development use.
+The recommended approach to running localdev is to use the [`docker-compose.yml`](/docker-compose.yml) spec to run edihkal (and other required services e.g. database) in containers.
 
 **Requirements:**
+- A container engine like Docker or Podman must be installed to run containers.
+- `docker-compose` (or an equivalent tool) must be installed to use the `docker-compose.yml` specification.
 
-* Install `pg_isready` to detect when the database service finishes initializing before continuing setup.
-* Install a container tool such as `podman` or `docker`.
-
-### `init_db.sh` Usage
-
-Optionally configure the database service using the following environment variables:
-
-* `POSTGRES_DB`
-* `POSTGRES_HOST`
-* `POSTGRES_PASSWORD`
-* `POSTGRES_PORT`
-* `POSTGRES_USER`
-
-If these are not set, default values in the script will be used.
-
-The plain usage will start the database container and wait for the service to be ready.
+Start the containers using `docker-compose`:
 
 ```sh
-./init_db.sh
+docker-compose up
+```
+
+After the containers have started, the edihkal API will be listening on `https://localhost:8443` and the database will be listening on `localhost:5432`.
+
+To ensure that new images are built (with updated code from your workspace), use the `--build` flag:
+
+```sh
+docker-compose up --build
 ```
