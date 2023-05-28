@@ -1,22 +1,7 @@
 //! Tests different ways to construct a [`user::ActiveModel`] and ensures Uuid is never nil.
-use entity::user::{ActiveModel, Model, NewModel};
+use entity::user::{ActiveModel, Model};
 
 use sea_orm::{ActiveModelBehavior, IntoActiveModel};
-
-/// `NewModel.into_active_model()` has expected values.
-///
-/// This is the preferred approach to get an `ActiveModel` from a new drug request.
-#[test]
-fn new_user_into_active_model_has_expected_values() {
-    let new_drug = NewModel {
-        username: "willywonka".into(),
-        password_hash: "TODO".into(),
-    };
-    let active_model = new_drug.into_active_model();
-
-    assert!(active_model.id.is_set());
-    assert!(!active_model.id.as_ref().is_nil());
-}
 
 /// An `ActiveModel` constructed with `ActiveModel`'s `Default::default()` has expected values.
 #[test]
