@@ -18,6 +18,8 @@ services:
         source: ./edihkal/localdev/self-signed-certs
         target: /app/self-signed-certs
         read_only: true
+    # Allows colored output for bunyan
+    tty: true
   edihkal-db:
     env_file: .env
     image: postgres:15-alpine
