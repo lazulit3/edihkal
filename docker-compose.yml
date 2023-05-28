@@ -1,0 +1,33 @@
+# docker-compose.yml for localdev
+version: '3.7'
+services:
+  edihkal:
+    build:
+      context: .
+      dockerfile: edihkal/docker/Dockerfile.localdev
+    environment:
+      - EDIHKAL_APPLICATION__HOST=0.0.0.0
+      - EDIHKAL_DATABASE__HOST=edihkal-db
+      - EDIHKAL_TLS__CERTIFICATE=/app/self-signed-certs/cert.pem
+      - EDIHKAL_TLS__KEY=/app/self-signed-certs/key.pem
+    ports:
+      - 8443:8443
+    restart: always
+    volumes:
+      - type: bind
+        source: ./edihkal/localdev/self-signed-certs
+        target: /app/self-signed-certs
+        read_only: true
+  edihkal-db:
+    env_file: .env
+    image: postgres:15-alpine
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - type: volume
+        source: edihkal-db
+        target: /var/lib/postgres/data
+        read_only: false
+volumes:
+  edihkal-db:
