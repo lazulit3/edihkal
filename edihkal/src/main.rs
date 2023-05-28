@@ -15,7 +15,10 @@ async fn main() -> Result<()> {
 
     let tls_config = RustlsConfig::from_pem_file(&config.tls.certificate, &config.tls.key)
         .await
-        .context("Failed to configure rustls using configured certificate and key")?;
+        .context(format!(
+            "Failed to configure rustls using configured certificate ({}) and key ({})",
+            &config.tls.certificate, &config.tls.key
+        ))?;
 
     axum_server::bind_rustls(addr, tls_config)
         .serve(app(&config).await?.into_make_service())
