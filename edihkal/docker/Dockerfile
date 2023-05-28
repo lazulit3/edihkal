@@ -13,6 +13,10 @@ RUN cargo build --release --bin edihkal
 
 FROM debian:bullseye-slim AS runtime
 WORKDIR /app
+LABEL org.opencontainers.image.authors="lazulit3 <lazulit3@riseup.net>" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.title="edihkal" \
+      org.opencontainers.image.url="https://github.com/lazulit3/edihkal"
 COPY --from=builder /app/target/release/edihkal edihkal
 COPY edihkal/configuration configuration
 ENV EDIHKAL_ENVIRONMENT production
