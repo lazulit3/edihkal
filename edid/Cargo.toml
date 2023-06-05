@@ -13,7 +13,7 @@ chrono = { version = "0.4.25", default-features = false, features = ["clock"] }
 clap = { version = "4.3.0", features = ["derive"] }
 edihkal-client = { version = "0.1.0", path = "../edihkal-client" }
 edihkal_tracing = { version = "0.1.0", path = "../edihkal_tracing" }
-figment = { version = "0.10.9", features = ["env", "toml"] }
+figment = { version = "0.10.10", features = ["env", "toml"] }
 interim = { version = "0.1.0", features = ["chrono"] }
 serde = { version = "1.0.163", features = ["derive"] }
 thiserror = "1.0.37"
