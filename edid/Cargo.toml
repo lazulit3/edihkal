@@ -15,6 +15,6 @@ edihkal-client = { version = "0.1.0", path = "../edihkal-client" }
 edihkal_tracing = { version = "0.1.0", path = "../edihkal_tracing" }
 figment = { version = "0.10.9", features = ["env", "toml"] }
 interim = { version = "0.1.0", features = ["chrono"] }
-serde = { version = "1.0.163", features = ["derive"] }
+serde = { version = "1.0.165", features = ["derive"] }
 thiserror = "1.0.37"
 tokio = { version = "1.28", features = ["macros", "rt"] }
