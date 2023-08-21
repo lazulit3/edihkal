@@ -8,7 +8,7 @@ edition.repository = true
 edition.workspace = true
 
 [dependencies]
-anyhow = "1.0.65"
+anyhow = "1.0.75"
 axum = { version = "0.6.18", default-features = false, features = ["http1", "json", "query", "tokio"] }
 axum-server = { version = "0.5.1", features = ["tls-rustls"] }
 config = { version = "0.13.3", default-features = false, features = ["yaml"] }
