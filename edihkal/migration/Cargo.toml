@@ -5,7 +5,6 @@ publish = false
 # Inherit these from workspace Cargo.toml
 edition.workspace = true
 license.workspace = true
-license-file.workspace = true
 repository.workspace = true
 
 [lib]
