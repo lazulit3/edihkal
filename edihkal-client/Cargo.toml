@@ -2,8 +2,11 @@
 name = "edihkal-client"
 version = "0.1.0"
 description = "Client for edihkal API."
-edition.repository = true
+# Inherit these from workspace Cargo.toml
 edition.workspace = true
+license.workspace = true
+license-file.workspace = true
+repository.workspace = true
 
 [dependencies]
 entity = { version = "0.1.0", path = "../entity" }

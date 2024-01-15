@@ -2,9 +2,11 @@
 name = "entity"
 version = "0.1.0"
 publish = false
-edition.license = true
-edition.license-file = true
+# Inherit these from workspace Cargo.toml
 edition.workspace = true
+license.workspace = true
+license-file.workspace = true
+repository.workspace = true
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }

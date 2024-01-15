@@ -2,10 +2,11 @@
 name = "edid"
 version = "0.1.0"
 description = "A CLI client for edihkal."
-edition.license = true
-edition.license-file = true
-edition.repository = true
+# Inherit these from workspace Cargo.toml
 edition.workspace = true
+license.workspace = true
+license-file.workspace = true
+repository.workspace = true
 
 [dependencies]
 anyhow = "1.0.65"
