@@ -13,10 +13,10 @@ uuid = { version = "1", features = ["serde", "v4"] }
 
 [dependencies.sea_skipper]
 git = "https://github.com/lazulit3/sea_skipper.git"
-rev = "ec9f7fb4301afdf78d82f9365a4009e33bb45e1"
+rev = "d4ba5982d7ce00ae8424755b82274537c78a8f7d"
 features = ["derive", "derive-newmodel-with-serde"]
 
 [dependencies.sea-orm]
 default-features = false
 features = ["macros", "with-chrono", "with-json", "with-uuid"]
-version = "0.11"
+version = "0.12"
