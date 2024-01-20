@@ -6,7 +6,7 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use sea_orm::{DbErr, RuntimeErr};
+use sea_orm::DbErr;
 
 #[derive(thiserror::Error, Debug)]
 // This is not currently a stable API.
@@ -33,10 +33,9 @@ pub enum ApiError {
 // This is not currently a stable API.
 #[non_exhaustive]
 pub enum DatabaseError {
-    /// **Warning:** Downcasting to `UniqueViolation` is currently only implemented for Postgres (`sea-orm-postgres` feature).
-    /// On other database backends a unique violation will result in a [`DatabaseError::Unknown`].
     #[error("Duplicate key violates unique constraint")]
-    UniqueViolation(#[from] sqlx::Error),
+    /// Error for duplicate record in unique field or primary key field
+    UniqueViolation(sea_orm::DbErr),
 
     /// Includes errors that downcasting is not implemented for yet (almost everything).
     #[error("Database error occurred")]
@@ -60,18 +59,11 @@ impl IntoResponse for ApiError {
 }
 
 impl From<DbErr> for DatabaseError {
-    fn from(error: DbErr) -> Self {
-        match error {
-            // TODO: Behavior for other databases
-            // #[cfg(feature = "sea-orm-postgres")]
-            // TODO: Check e.kind() for ErrorKind::UniqueViolation after sqlx 0.7 release:
-            //       https://github.com/launchbadge/sqlx/pull/2109
-            DbErr::Query(RuntimeErr::SqlxError(sqlx::Error::Database(e)))
-                if e.code().unwrap().eq("23505") =>
-            {
-                Self::UniqueViolation(sqlx::Error::Database(e))
-            }
-            _ => Self::Unknown(error.into()),
+    fn from(err: DbErr) -> Self {
+        if let Some(sea_orm::SqlErr::UniqueConstraintViolation(_)) = err.sql_err() {
+            Self::UniqueViolation(err)
+        } else {
+            Self::Unknown(err.into())
         }
     }
 }

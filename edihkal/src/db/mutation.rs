@@ -10,8 +10,7 @@ where
     R: Resource,
     D: DataTrait<R>,
 {
-    // anyhow context is not used here to support `DatabaseError::UniqueViolation` conversion from
-    // `sqlx::Error`.
+    // anyhow context is not used here to support `DatabaseError::UniqueViolation` conversion from DbErr
     Ok(data.into_active_model().insert(db).await?)
 }
 
